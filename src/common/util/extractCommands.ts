@@ -1,5 +1,6 @@
-import { CmdRunProdia } from '@/modules/prodia/prodia.client';
-import { CmdRunReact, CmdRunSearch } from '@/modules/search/search.client';
+import { CmdRunProdia } from '~/modules/prodia/prodia.client';
+import { CmdRunReact } from '~/modules/aifn/react/react';
+import { CmdRunSearch } from '~/modules/google/search.client';
 
 export const commands = [...CmdRunProdia, ...CmdRunSearch, ...CmdRunReact];
 
@@ -13,7 +14,7 @@ export interface SentencePiece {
  * Used by rendering functions, as well as input processing functions.
  */
 export function extractCommands(input: string): SentencePiece[] {
-  const regexFromTags = commands.map(tag => `\\${tag}`).join('\\b|') + '\\b';
+  const regexFromTags = commands.map(tag => `^\\${tag} `).join('\\b|') + '\\b';
   const pattern = new RegExp(regexFromTags, 'g');
   const result: SentencePiece[] = [];
   let lastIndex = 0;
@@ -22,7 +23,7 @@ export function extractCommands(input: string): SentencePiece[] {
   while ((match = pattern.exec(input)) !== null) {
     if (match.index !== lastIndex)
       result.push({ type: 'text', value: input.substring(lastIndex, match.index) });
-    result.push({ type: 'cmd', value: match[0] });
+    result.push({ type: 'cmd', value: match[0].trim() });
     lastIndex = pattern.lastIndex;
 
     // Remove the space after the matched tag

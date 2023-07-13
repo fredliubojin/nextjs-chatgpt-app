@@ -1,6 +1,8 @@
 import * as React from 'react';
 
-import { Box, useTheme } from '@mui/joy';
+import { Box, Tooltip, useTheme } from '@mui/joy';
+
+import { tokensPrettyMath } from './TokenBadge';
 
 
 /**
@@ -8,53 +10,75 @@ import { Box, useTheme } from '@mui/joy';
  *
  * The Textarea contains it within the Composer (at least).
  */
-export function TokenProgressbar(props: { indirect: number, direct: number, limit: number }) {
+export function TokenProgressbar(props: { history: number, response: number, direct: number, limit: number }) {
   // external state
   const theme = useTheme();
 
-  if (!(props.limit > 0) || (!props.direct && !props.indirect)) return null;
+  if (!(props.limit > 0) || (!props.direct && !props.history && !props.response)) return null;
 
-  let indirectPct = 100 * props.indirect / props.limit;
-  let totalPct = 100 * (props.indirect + props.direct) / props.limit;
+  // compute percentages
+  let historyPct = 100 * props.history / props.limit;
+  let responsePct = 100 * props.response / props.limit;
+  let directPct = 100 * props.direct / props.limit;
+  const totalPct = historyPct + responsePct + directPct;
   const isOverflow = totalPct >= 100;
 
   if (isOverflow) {
-    indirectPct *= 100 / totalPct;
-    totalPct = 100 * 100 / totalPct;
+    let scale = 100 / totalPct;
+    scale *= scale; // make proportional space for the 'danger' (overflow) representation
+    historyPct *= scale;
+    responsePct *= scale;
+    directPct *= scale;
   }
 
-  const directColor = theme.vars.palette.primary.softHoverBg;
-  const indirectColor = theme.vars.palette.neutral.softHoverBg;
+  // bar colors
+  const historyColor = theme.vars.palette.neutral.softHoverBg;
+  const directColor = theme.vars.palette.primary.solidBg;
+  const responseColor = theme.vars.palette.neutral.softHoverBg;
   const overflowColor = theme.vars.palette.danger.solidBg;
 
+  // tooltip message/color
+  const { message, color } = tokensPrettyMath(props.limit, props.direct, props.history + props.response);
+
+  // sizes
   const containerHeight = 8;
   const height = isOverflow ? 8 : 4;
 
   return (
 
-    <Box sx={{
-      position: 'absolute', left: 1, right: 1, bottom: 1, height: containerHeight,
-      overflow: 'hidden', borderBottomLeftRadius: 7, borderBottomRightRadius: 7,
-    }}>
+    <Tooltip title={<span style={{ whiteSpace: 'pre' }}>{message}</span>} color={color} sx={{ fontFamily: theme.fontFamily.code }}>
 
-      {/* Indirect */}
-      {indirectPct > 0 && <Box sx={{
-        background: indirectColor,
-        position: 'absolute', left: 0, bottom: 0, width: indirectPct + '%', height,
-      }} />}
+      <Box sx={{
+        position: 'absolute', left: 1, right: 1, bottom: 1, height: containerHeight,
+        overflow: 'hidden', borderBottomLeftRadius: 7, borderBottomRightRadius: 7,
+      }}>
 
-      {/* Direct */}
-      {totalPct > indirectPct && <Box sx={{
-        background: directColor,
-        position: 'absolute', left: indirectPct + '%', bottom: 0, width: (totalPct - indirectPct) + '%', height,
-      }} />}
+        {/* History */}
+        {historyPct > 0 && <Box sx={{
+          background: historyColor,
+          position: 'absolute', left: 0, bottom: 0, width: historyPct + '%', height,
+        }} />}
 
-      {/* Overflow */}
-      {isOverflow && <Box sx={{
-        background: overflowColor,
-        position: 'absolute', left: totalPct + '%', right: 0, bottom: 0, height,
-      }} />}
+        {/* Direct */}
+        {directPct > 0 && <Box sx={{
+          background: directColor,
+          position: 'absolute', left: historyPct + '%', bottom: 0, width: directPct + '%', height,
+        }} />}
 
-    </Box>
+        {/* Response */}
+        {responsePct > 0 && <Box sx={{
+          background: responseColor,
+          position: 'absolute', left: (totalPct > 100 ? (historyPct + directPct) : (100 - responsePct)) + '%', bottom: 0, width: responsePct + '%', height,
+        }} />}
+
+        {/* Overflow */}
+        {isOverflow && <Box sx={{
+          background: overflowColor,
+          position: 'absolute', left: (historyPct + directPct + responsePct) + '%', right: 0, bottom: 0, height,
+        }} />}
+
+      </Box>
+
+    </Tooltip>
   );
 }

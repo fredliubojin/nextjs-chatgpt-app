@@ -9,9 +9,8 @@ export const hideOnMobile = { display: { xs: 'none', md: 'flex' } };
 export const hideOnDesktop = { display: { xs: 'flex', md: 'none' } };
 
 // Dimensions
-export const settingsGap: number = 2;
-export const settingsCol1Width: number = 150;
-export const settingsMaxWidth: number = 500;
+export const settingsGap = 2;
+export const settingsCol1Width = 150;
 
 
 // Theme & Fonts
@@ -35,6 +34,14 @@ export const theme = extendTheme({
     body: inter.style.fontFamily,
     code: jetBrainsMono.style.fontFamily,
   },
+  /*typography: {
+    display1: {
+      fontSize: 'var(--joy-fontSize-xl5, 3rem)',
+      background: 'linear-gradient(-30deg, var(--joy-palette-primary-plainColor), var(--joy-palette-primary-solidBg))',
+      WebkitBackgroundClip: 'text',
+      WebkitTextFillColor: 'transparent',
+    },
+  },*/
   colorSchemes: {
     light: {
       palette: {

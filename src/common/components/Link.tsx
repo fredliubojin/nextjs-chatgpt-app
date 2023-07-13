@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { useRouter } from 'next/router';
 import NextLink, { LinkProps as NextLinkProps } from 'next/link';
-import clsx from 'clsx';
 
 import { Link as MuiLink, LinkProps as MuiLinkProps, styled } from '@mui/joy';
 
@@ -71,7 +70,6 @@ export const Link = React.forwardRef<HTMLAnchorElement, LinkProps>(function Link
     noLinkStyle,
     prefetch,
     replace,
-    role, // Link don't have roles.
     scroll,
     shallow,
     ...other
@@ -79,16 +77,14 @@ export const Link = React.forwardRef<HTMLAnchorElement, LinkProps>(function Link
 
   const router = useRouter();
   const pathname = typeof href === 'string' ? href : href.pathname;
-  const className = clsx(classNameProps, {
-    [activeClassName]: router.pathname === pathname && activeClassName,
-  });
+  const className = `${classNameProps || ''}${router.pathname === pathname ? ` ${activeClassName}` : ''}`;
 
   // external links: MuiLink (default) or 'a'
   const isExternal = typeof href === 'string' && (href.indexOf('http') === 0 || href.indexOf('mailto:') === 0);
   if (isExternal)
-    return !noLinkStyle
-      ? <MuiLink className={className} href={href} ref={ref} {...other} />
-      : <Anchor className={className} href={href} ref={ref} {...other} />;
+    return noLinkStyle
+      ? <Anchor className={className} href={href} ref={ref} {...other} />
+      : <MuiLink className={className} href={href} ref={ref} {...other} />;
 
   const linkAs = linkAsProp || as;
   const nextjsProps = {
@@ -103,7 +99,7 @@ export const Link = React.forwardRef<HTMLAnchorElement, LinkProps>(function Link
   };
 
   // internal (routed) links: MuiLink (default, over NextLinkComposed) or NextLinkComposed
-  return !noLinkStyle
-    ? <MuiLink component={NextLinkComposed} className={className} ref={ref} {...nextjsProps} {...other} />
-    : <NextLinkComposed className={className} ref={ref} {...nextjsProps} {...other} />;
+  return noLinkStyle
+    ? <NextLinkComposed className={className} ref={ref} {...nextjsProps} {...other} />
+    : <MuiLink component={NextLinkComposed} className={className} ref={ref} {...nextjsProps} {...other} />;
 });
