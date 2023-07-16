@@ -1,0 +1,2162 @@
+Here is the JSON file based on requested format:
+
+```json
+{
+    "exportImport.ts": {
+        "path": "./chat/exportImport.ts",
+        "purpose": "This file exports two functions -- one for downloading a conversation as a JSON file and another for restoring a conversation from a JSON string.",
+        "imported_symbols": ["defaultSystemPurposeId", "DConversation"],
+        "exported_symbols": [
+            {
+                "downloadConversationJson": "This function is used to download a conversation as a JSON file."
+            },
+            {
+                "restoreConversationFromJson": "This function is used to restore a conversation from a JSON string."
+            }
+        ]
+    }
+}
+```
+========
+{
+    "exportImport.ts": {
+        "path": "./chat/exportImport.ts",
+        "purpose": "This file exports two functions -- one for downloading a conversation as a JSON file and another for restoring a conversation from a JSON string.",
+        "imported_symbols": ["defaultSystemPurposeId", "DConversation"],
+        "exported_symbols": [
+            {
+                "downloadConversationJson": "This function is used to download a conversation as a JSON file."
+            },
+            {
+                "restoreConversationFromJson": "This function is used to restore a conversation from a JSON string."
+            }
+        ]
+    }
+}
+Sure, here's the JSON file you requested based on the input file provided:
+
+```json
+{
+    "image-generate.ts": {
+        "path": "./chat/editors/image-generate.ts",
+        "purpose": "This file contains a function for running image generation and updating the chat state based on the 'imagine' command.",
+        "imported_symbols": [
+            "apiAsync", 
+            "prodiaDefaultModelId", 
+            "useProdiaStore", 
+            "useChatStore", 
+            "createAssistantTypingMessage"
+        ],
+        "exported_symbols": [
+            {
+                "runImageGenerationUpdatingState": "This function asynchronously fetches an image URL based on the provided text and updates the assistant's message in the chat store. In case of an error, it updates the message with an appropriate error text."
+            }
+        ]
+    }
+}
+```
+
+This JSON is explaining the main characteristics of the `image-generate.ts` file, including its path, general purpose, imported symbols, and exported symbols with their descriptions.
+========
+{
+    "image-generate.ts": {
+        "path": "./chat/editors/image-generate.ts",
+        "purpose": "This file contains a function for running image generation and updating the chat state based on the 'imagine' command.",
+        "imported_symbols": [
+            "apiAsync", 
+            "prodiaDefaultModelId", 
+            "useProdiaStore", 
+            "useChatStore", 
+            "createAssistantTypingMessage"
+        ],
+        "exported_symbols": [
+            {
+                "runImageGenerationUpdatingState": "This function asynchronously fetches an image URL based on the provided text and updates the assistant's message in the chat store. In case of an error, it updates the message with an appropriate error text."
+            }
+        ]
+    }
+}
+Based on the content of the source file provided, here's a JSON file that fulfills your requirements:
+
+```json
+{
+    "chat-stream.ts": {
+        "path": "./chat/editors/chat-stream.ts",
+        "purpose": "This file is responsible for managing the chat stream of an AI assistant, which includes generating, streaming, and updating chat messages; and configuring the AI output.",
+        "imported_symbols": [
+            "ChatGenerateSchema",
+            "DLLMId",
+            "LLMOptionsOpenAI",
+            "normalizeOAISetup",
+            "SourceSetupOpenAI",
+            "OpenAI",
+            "SystemPurposeId",
+            "apiAsync",
+            "autoTitle",
+            "findLLMOrThrow",
+            "speakText",
+            "useElevenlabsStore",
+            "DMessage",
+            "useChatStore",
+            "createAssistantTypingMessage",
+            "updatePurposeInHistory"
+        ],
+        "exported_symbols": [
+            {"runAssistantUpdatingState": "An async function that manages the state of the assistant by starting to type, streaming the assistant's message, and updating the chat title if needed."},
+            {"streamAssistantMessage": "An internal async function that streams the assistant's message, dealing with message modifications, the assistant's speech, and error handling."}
+        ]
+    }
+}
+```
+========
+{
+    "chat-stream.ts": {
+        "path": "./chat/editors/chat-stream.ts",
+        "purpose": "This file is responsible for managing the chat stream of an AI assistant, which includes generating, streaming, and updating chat messages; and configuring the AI output.",
+        "imported_symbols": [
+            "ChatGenerateSchema",
+            "DLLMId",
+            "LLMOptionsOpenAI",
+            "normalizeOAISetup",
+            "SourceSetupOpenAI",
+            "OpenAI",
+            "SystemPurposeId",
+            "apiAsync",
+            "autoTitle",
+            "findLLMOrThrow",
+            "speakText",
+            "useElevenlabsStore",
+            "DMessage",
+            "useChatStore",
+            "createAssistantTypingMessage",
+            "updatePurposeInHistory"
+        ],
+        "exported_symbols": [
+            {"runAssistantUpdatingState": "An async function that manages the state of the assistant by starting to type, streaming the assistant's message, and updating the chat title if needed."},
+            {"streamAssistantMessage": "An internal async function that streams the assistant's message, dealing with message modifications, the assistant's speech, and error handling."}
+        ]
+    }
+}
+Here is the JSON data you requested:
+
+```json
+{
+    "react-tangent.ts": {
+        "path": "./chat/editors/react-tangent.ts",
+        "purpose": "This file is used to create and manage the chat behavior of an AI agent in a conversation. It enables asynchronous communication, the use of temporary messages, and handles errors during a conversation.",
+        "imported_symbols": [
+            "Agent",
+            "DLLMId",
+            "createDEphemeral",
+            "DMessage",
+            "useChatStore",
+            "createAssistantTypingMessage"
+        ],
+        "exported_symbols": [
+            {
+                "runReActUpdatingState": "This function synchronizes the state during the chat conversation. It manages the message flow, creates and updates temporary messages and handles possible errors during a conversation. The function also logs chat activities."
+            }
+        ]
+    }
+}
+```
+========
+{
+    "react-tangent.ts": {
+        "path": "./chat/editors/react-tangent.ts",
+        "purpose": "This file is used to create and manage the chat behavior of an AI agent in a conversation. It enables asynchronous communication, the use of temporary messages, and handles errors during a conversation.",
+        "imported_symbols": [
+            "Agent",
+            "DLLMId",
+            "createDEphemeral",
+            "DMessage",
+            "useChatStore",
+            "createAssistantTypingMessage"
+        ],
+        "exported_symbols": [
+            {
+                "runReActUpdatingState": "This function synchronizes the state during the chat conversation. It manages the message flow, creates and updates temporary messages and handles possible errors during a conversation. The function also logs chat activities."
+            }
+        ]
+    }
+}
+Here's the JSON output you requested, based on the content of your TypeScript source file:
+
+```json
+{
+    "editors.ts": {
+        "path": "./chat/editors/editors.ts",
+        "purpose": "This file mainly handles the creation and updating of assistant and system messages within a chat.",
+        "imported_symbols": [
+            "DLLMId",
+            "SystemPurposeId",
+            "SystemPurposes",
+            "createDMessage",
+            "DMessage",
+            "useChatStore"
+        ],
+        "exported_symbols": [
+            {
+                "createAssistantTypingMessage": "This function creates a 'typing' message generated by the assistant, appends it to the chat, and returns the message's ID."
+            },
+            {
+                "updatePurposeInHistory": "This function searches for a system message in the chat history, updates its purpose ID and corresponding text if needed, updates the chat history to contain the updated system message at start, and returns the updated history."
+            }
+        ]
+    }
+}
+```
+========
+{
+    "editors.ts": {
+        "path": "./chat/editors/editors.ts",
+        "purpose": "This file mainly handles the creation and updating of assistant and system messages within a chat.",
+        "imported_symbols": [
+            "DLLMId",
+            "SystemPurposeId",
+            "SystemPurposes",
+            "createDMessage",
+            "DMessage",
+            "useChatStore"
+        ],
+        "exported_symbols": [
+            {
+                "createAssistantTypingMessage": "This function creates a 'typing' message generated by the assistant, appends it to the chat, and returns the message's ID."
+            },
+            {
+                "updatePurposeInHistory": "This function searches for a system message in the chat history, updates its purpose ID and corresponding text if needed, updates the chat history to contain the updated system message at start, and returns the updated history."
+            }
+        ]
+    }
+}
+Based on your request, here's the generated JSON output:
+
+```json
+{
+  "AppChat.tsx":
+    {
+      "path": "./chat/AppChat.tsx",
+      "purpose": "This is a main chat component of the application with various functionalities like managing chat history, executing AI responses, managing user interaction, etc.",
+      "imported_symbols": ["React", "shallow", "useTheme", "PublishedSchema", "CmdRunProdia", "CmdRunReact", "PublishedModal", "apiAsync", "imaginePromptFromText", "useModelsStore", "Brand", "ConfirmationModal", "Link", "conversationToMarkdown", "createDMessage", "DMessage", "useChatStore", "extractCommands", "useApplicationBarStore", "useUIPreferencesStore", "ChatContextItems", "ChatMessageList", "Composer", "ConversationItems", "Dropdowns", "Ephemerals", "ImportedModal", "ImportedOutcome", "restoreConversationFromJson", "runAssistantUpdatingState", "runImageGenerationUpdatingState", "runReActUpdatingState"],
+      "exported_symbols": [
+        {"AppChat": "A component that facilitates chat functionality for an application including message sending, message history execution, conversation management, etc."}
+      ]
+    }
+  
+}
+```
+
+Please note that this content simply reflects the purpose and symbols based on the content and structure of the TypeScript code provided in the file `AppChat.tsx`. The exact descriptions would depend on the actual functionality implemented by the developer.
+========
+{
+  "AppChat.tsx":
+    {
+      "path": "./chat/AppChat.tsx",
+      "purpose": "This is a main chat component of the application with various functionalities like managing chat history, executing AI responses, managing user interaction, etc.",
+      "imported_symbols": ["React", "shallow", "useTheme", "PublishedSchema", "CmdRunProdia", "CmdRunReact", "PublishedModal", "apiAsync", "imaginePromptFromText", "useModelsStore", "Brand", "ConfirmationModal", "Link", "conversationToMarkdown", "createDMessage", "DMessage", "useChatStore", "extractCommands", "useApplicationBarStore", "useUIPreferencesStore", "ChatContextItems", "ChatMessageList", "Composer", "ConversationItems", "Dropdowns", "Ephemerals", "ImportedModal", "ImportedOutcome", "restoreConversationFromJson", "runAssistantUpdatingState", "runImageGenerationUpdatingState", "runReActUpdatingState"],
+      "exported_symbols": [
+        {"AppChat": "A component that facilitates chat functionality for an application including message sending, message history execution, conversation management, etc."}
+      ]
+    }
+  
+}
+Here is the JSON generated based on the content of the source file you provided:
+
+```json
+{
+    "ImportedModal.tsx": {
+        "path": "./chat/components/appbar/ImportedModal.tsx",
+        "purpose": "Displays the result of an import operation as a modal dialog. Import operations supported are JSON Chat.",
+        "imported_symbols": ["React", "Box", "Button", "Divider", "List", "ListItem", "Modal", "ModalDialog", "Typography"],
+        "exported_symbols": [
+            {"ImportedOutcome": "An interface that defines the type of outcome after conversations are imported."},
+            {"ImportedModal": "A function that takes in an outcome of imported conversations and displays the results in a modal dialog."}
+        ]
+    }
+
+}
+```
+========
+{
+    "ImportedModal.tsx": {
+        "path": "./chat/components/appbar/ImportedModal.tsx",
+        "purpose": "Displays the result of an import operation as a modal dialog. Import operations supported are JSON Chat.",
+        "imported_symbols": ["React", "Box", "Button", "Divider", "List", "ListItem", "Modal", "ModalDialog", "Typography"],
+        "exported_symbols": [
+            {"ImportedOutcome": "An interface that defines the type of outcome after conversations are imported."},
+            {"ImportedModal": "A function that takes in an outcome of imported conversations and displays the results in a modal dialog."}
+        ]
+    }
+
+}
+```json
+{
+  "ConversationItems.tsx": {
+    "path": "./chat/components/appbar/ConversationItems.tsx",
+    "purpose": "This file defines the 'ConversationItems' React component, and it shows the list of conversation items along with the functionality such as creation of new conversation, activation of conversation, deletion of conversation, importing of conversation, display of conversation symbols, etc.",
+    "imported_symbols": [
+      "React",
+      "shallow",
+      "Box",
+      "ListDivider",
+      "ListItemDecorator",
+      "MenuItem",
+      "Tooltip",
+      "Typography",
+      "AddIcon",
+      "DeleteOutlineIcon",
+      "FileUploadIcon",
+      "MAX_CONVERSATIONS",
+      "useChatStore",
+      "useApplicationBarStore",
+      "useUIPreferencesStore",
+      "ConversationItem"
+    ],
+    "exported_symbols": [
+      { "ConversationItems": "A React component that provides a list of 'ConversationItems' along with providing functionality of creation, activation, deletion, importing, and display of conversation symbols of individual conversation instances." }
+    ]
+  }
+}
+```
+========
+{
+  "ConversationItems.tsx": {
+    "path": "./chat/components/appbar/ConversationItems.tsx",
+    "purpose": "This file defines the 'ConversationItems' React component, and it shows the list of conversation items along with the functionality such as creation of new conversation, activation of conversation, deletion of conversation, importing of conversation, display of conversation symbols, etc.",
+    "imported_symbols": [
+      "React",
+      "shallow",
+      "Box",
+      "ListDivider",
+      "ListItemDecorator",
+      "MenuItem",
+      "Tooltip",
+      "Typography",
+      "AddIcon",
+      "DeleteOutlineIcon",
+      "FileUploadIcon",
+      "MAX_CONVERSATIONS",
+      "useChatStore",
+      "useApplicationBarStore",
+      "useUIPreferencesStore",
+      "ConversationItem"
+    ],
+    "exported_symbols": [
+      { "ConversationItems": "A React component that provides a list of 'ConversationItems' along with providing functionality of creation, activation, deletion, importing, and display of conversation symbols of individual conversation instances." }
+    ]
+  }
+}
+Here is the JSON representation you requested:
+
+```json
+{
+    "Dropdowns.tsx": {
+        "path": "./chat/components/appbar/Dropdowns.tsx",
+        "purpose": "This file is used to create dropdowns for chat models and system purposes inside a chat app bar.",
+        "imported_symbols": [
+            "React",
+            "shallow",
+            "ListItemButton",
+            "ListItemDecorator",
+            "Typography",
+            "BuildCircleIcon",
+            "SettingsIcon",
+            "DLLMId",
+            "SystemPurposeId",
+            "SystemPurposes",
+            "useModelsStore",
+            "AppBarDropdown",
+            "DropdownItems",
+            "useChatStore",
+            "useUIPreferencesStore",
+            "useUIStateStore"
+        ],
+        "exported_symbols": [
+            {"Dropdowns": "React functional component used as an enhanced version of dropdown that includes Buttons and AppBarDropdown for different states and events."}
+        ]
+    }
+}
+``` 
+
+This JSON represents the details of the `Dropdowns.tsx` file including its path, purpose, imported and exported symbols. The 'Dropdowns' symbol is a React functional component that is being exported from the file. The purpose mentions that the file is used to create dropdowns for chat models and system purposes inside a chat app bar. The imported symbols are the dependencies that the file uses to function as intended.
+========
+{
+    "Dropdowns.tsx": {
+        "path": "./chat/components/appbar/Dropdowns.tsx",
+        "purpose": "This file is used to create dropdowns for chat models and system purposes inside a chat app bar.",
+        "imported_symbols": [
+            "React",
+            "shallow",
+            "ListItemButton",
+            "ListItemDecorator",
+            "Typography",
+            "BuildCircleIcon",
+            "SettingsIcon",
+            "DLLMId",
+            "SystemPurposeId",
+            "SystemPurposes",
+            "useModelsStore",
+            "AppBarDropdown",
+            "DropdownItems",
+            "useChatStore",
+            "useUIPreferencesStore",
+            "useUIStateStore"
+        ],
+        "exported_symbols": [
+            {"Dropdowns": "React functional component used as an enhanced version of dropdown that includes Buttons and AppBarDropdown for different states and events."}
+        ]
+    }
+}
+```json
+{
+  "ChatContextItems.tsx": {
+    "path": "./chat/components/appbar/ChatContextItems.tsx",
+    "purpose": "This React component file defines chat context menu aspects, containing different elements and operations such as System Message toggle, Conversation Publish, and Download, Toggle Message Selection Mode and Conversation Clear.",
+    "imported_symbols": [
+      "React",
+      "shallow",
+      "ListDivider",
+      "ListItem",
+      "ListItemDecorator",
+      "MenuItem",
+      "Switch",
+      "Typography",
+      "CheckBoxOutlineBlankOutlinedIcon",
+      "CheckBoxOutlinedIcon",
+      "ClearIcon",
+      "ExitToAppIcon",
+      "FileDownloadIcon",
+      "SettingsSuggestIcon",
+      "useApplicationBarStore",
+      "useChatStore",
+      "useUIPreferencesStore",
+      "downloadConversationJson"
+    ],
+    "exported_symbols": [
+      {
+        "ChatContextItems": "This function component allows interactions related to context menu in a chat application, such as system message toggle, conversation data download, sharing conversation and clearing conversation."
+      }
+    ]
+  }
+}
+```
+========
+{
+  "ChatContextItems.tsx": {
+    "path": "./chat/components/appbar/ChatContextItems.tsx",
+    "purpose": "This React component file defines chat context menu aspects, containing different elements and operations such as System Message toggle, Conversation Publish, and Download, Toggle Message Selection Mode and Conversation Clear.",
+    "imported_symbols": [
+      "React",
+      "shallow",
+      "ListDivider",
+      "ListItem",
+      "ListItemDecorator",
+      "MenuItem",
+      "Switch",
+      "Typography",
+      "CheckBoxOutlineBlankOutlinedIcon",
+      "CheckBoxOutlinedIcon",
+      "ClearIcon",
+      "ExitToAppIcon",
+      "FileDownloadIcon",
+      "SettingsSuggestIcon",
+      "useApplicationBarStore",
+      "useChatStore",
+      "useUIPreferencesStore",
+      "downloadConversationJson"
+    ],
+    "exported_symbols": [
+      {
+        "ChatContextItems": "This function component allows interactions related to context menu in a chat application, such as system message toggle, conversation data download, sharing conversation and clearing conversation."
+      }
+    ]
+  }
+}
+Here is the generated JSON file based on the provided TypeScript source code:
+
+```json
+{
+    "ConversationItem.tsx": {
+        "path": "./chat/components/appbar/ConversationItem.tsx",
+        "purpose": "This file defines a Component named ConversationItem, which manages user chat interactions in a particular conversation, allowing the user to activate a conversation, edit the conversation title, and delete a conversation.",
+        "imported_symbols": [
+            "React", 
+            "shallow", 
+            "Avatar", 
+            "Box", 
+            "IconButton", 
+            "ListItemDecorator", 
+            "MenuItem", 
+            "Typography",
+            "SxProps", 
+            "CloseIcon", 
+            "DeleteOutlineIcon", 
+            "DConversation", 
+            "useChatStore", 
+            "InlineTextarea", 
+            "useUIPreferencesStore", 
+            "SystemPurposes"
+        ],
+        "exported_symbols": [
+            {"ConversationItem": "The main component of this file, allows user to manage their chat in a particular conversation, including activating the conversation, editing title, or deleting the conversation."}
+        ]
+    }
+}
+```
+
+This generated JSON file provides the details asked in the task, about the purpose, imports and exports of the 'ConversationItem.tsx' file.
+========
+{
+    "ConversationItem.tsx": {
+        "path": "./chat/components/appbar/ConversationItem.tsx",
+        "purpose": "This file defines a Component named ConversationItem, which manages user chat interactions in a particular conversation, allowing the user to activate a conversation, edit the conversation title, and delete a conversation.",
+        "imported_symbols": [
+            "React", 
+            "shallow", 
+            "Avatar", 
+            "Box", 
+            "IconButton", 
+            "ListItemDecorator", 
+            "MenuItem", 
+            "Typography",
+            "SxProps", 
+            "CloseIcon", 
+            "DeleteOutlineIcon", 
+            "DConversation", 
+            "useChatStore", 
+            "InlineTextarea", 
+            "useUIPreferencesStore", 
+            "SystemPurposes"
+        ],
+        "exported_symbols": [
+            {"ConversationItem": "The main component of this file, allows user to manage their chat in a particular conversation, including activating the conversation, editing title, or deleting the conversation."}
+        ]
+    }
+}
+Below is the JSON generated based on your source file:
+
+```json
+{
+    "TokenProgressbar.tsx": {
+        "path": "./chat/components/composer/TokenProgressbar.tsx",
+        "purpose": "This component works as a progress bar for token history, direct tokens, and response tokens with overlimit checks, it appears within the Composer",
+        "imported_symbols": ["React", "Box", "ToolTip", "useTheme", "tokensPrettyMath"],
+        "exported_symbols": [
+            {"TokenProgressbar": "A progress bar component for different types of tokens, handle overflows and sizing, comes with tooltip"}
+        ]
+    }
+}
+```
+
+Let me describe each section:
+- `path`: This is the location of the source file.
+- `purpose`: This is a brief description of the source file.
+- `imported_symbols`: This list contains all the symbols or dependencies imported in this source file.
+- `exported_symbols`: This list provides descriptions for the all exported symbols. There's only one exported symbol "TokenProgressbar" in this source file, and it's a component that creates a progress bar for different types of tokens with overflow handling and sizing.
+========
+{
+    "TokenProgressbar.tsx": {
+        "path": "./chat/components/composer/TokenProgressbar.tsx",
+        "purpose": "This component works as a progress bar for token history, direct tokens, and response tokens with overlimit checks, it appears within the Composer",
+        "imported_symbols": ["React", "Box", "ToolTip", "useTheme", "tokensPrettyMath"],
+        "exported_symbols": [
+            {"TokenProgressbar": "A progress bar component for different types of tokens, handle overflows and sizing, comes with tooltip"}
+        ]
+    }
+}
+{"store-composer.ts": 
+    {
+        "path": "./chat/components/composer/store-composer.ts",
+        "purpose": "This file is used to manage the state of the Composer component, including sent messages and startup text.",
+        "imported_symbols": ["create", "persist"],
+        "exported_symbols": [
+            {"useComposerStore": "This is a Zustand store that manages the state of a Composer component."}
+        ]
+    }
+}
+========
+{"store-composer.ts": 
+    {
+        "path": "./chat/components/composer/store-composer.ts",
+        "purpose": "This file is used to manage the state of the Composer component, including sent messages and startup text.",
+        "imported_symbols": ["create", "persist"],
+        "exported_symbols": [
+            {"useComposerStore": "This is a Zustand store that manages the state of a Composer component."}
+        ]
+    }
+}
+Here is the generated JSON file based on the provided TypeScript code:
+
+```
+{  
+   "Composer.tsx":{  
+      "path":"./chat/components/composer",
+      "purpose":"This file is a React component for composing and sending messages in a chat interface. It supports text and code pasting from the clipboard, and a local log of sent messages.",
+      "imported_symbols":[  
+         "React",
+         "shallow",
+         "Box",
+         "Button",
+         "ButtonGroup",
+         "Card",
+         "Grid",
+         "IconButton",
+         "ListDivider",
+         "ListItemDecorator",
+         "Menu",
+         "MenuItem",
+         "Stack",
+         "Textarea",
+         "Tooltip",
+         "Typography",
+         "useTheme",
+         "ColorPaletteProp",
+         "SxProps",
+         "VariantProp",
+         "ContentPasteGoIcon",
+         "DataArrayIcon",
+         "DeleteOutlineIcon",
+         "ExpandLessIcon",
+         "FormatAlignCenterIcon",
+         "KeyboardArrowUpIcon",
+         "MicIcon",
+         "PanToolIcon",
+         "PictureAsPdfIcon",
+         "PsychologyIcon",
+         "SendIcon",
+         "StopOutlinedIcon",
+         "TelegramIcon",
+         "UploadFileIcon",
+         "ContentReducer",
+         "useChatLLM",
+         "ConfirmationModal",
+         "useSpeechRecognition",
+         "countModelTokens",
+         "extractFilePathsWithCommonRadix",
+         "hideOnDesktop",
+         "hideOnMobile",
+         "htmlTableToMarkdown",
+         "pdfToText",
+         "useChatStore",
+         "useUIPreferencesStore",
+         "ChatModeId",
+         "ChatModeMenu",
+         "TokenBadge",
+         "TokenProgressbar",
+         "useComposerStore"
+      ],
+      "exported_symbols":[  
+         {  
+            "Composer":"This is a React component for composing and sending messages in a chat-like interface. It supports pasting text and code from the clipboard, and a local log of sent messages."
+         }
+      ]
+   }
+}
+```
+
+In the "purpose" entry, I tried to give you a brief high-level summary of what the `Composer.tsx` module does based on its content and comments. The "imported_symbols" entry lists all the named imports used in this module. The "exported_symbols" entry provides a brief description of what the exported `Composer` function does.
+========
+{  
+   "Composer.tsx":{  
+      "path":"./chat/components/composer",
+      "purpose":"This file is a React component for composing and sending messages in a chat interface. It supports text and code pasting from the clipboard, and a local log of sent messages.",
+      "imported_symbols":[  
+         "React",
+         "shallow",
+         "Box",
+         "Button",
+         "ButtonGroup",
+         "Card",
+         "Grid",
+         "IconButton",
+         "ListDivider",
+         "ListItemDecorator",
+         "Menu",
+         "MenuItem",
+         "Stack",
+         "Textarea",
+         "Tooltip",
+         "Typography",
+         "useTheme",
+         "ColorPaletteProp",
+         "SxProps",
+         "VariantProp",
+         "ContentPasteGoIcon",
+         "DataArrayIcon",
+         "DeleteOutlineIcon",
+         "ExpandLessIcon",
+         "FormatAlignCenterIcon",
+         "KeyboardArrowUpIcon",
+         "MicIcon",
+         "PanToolIcon",
+         "PictureAsPdfIcon",
+         "PsychologyIcon",
+         "SendIcon",
+         "StopOutlinedIcon",
+         "TelegramIcon",
+         "UploadFileIcon",
+         "ContentReducer",
+         "useChatLLM",
+         "ConfirmationModal",
+         "useSpeechRecognition",
+         "countModelTokens",
+         "extractFilePathsWithCommonRadix",
+         "hideOnDesktop",
+         "hideOnMobile",
+         "htmlTableToMarkdown",
+         "pdfToText",
+         "useChatStore",
+         "useUIPreferencesStore",
+         "ChatModeId",
+         "ChatModeMenu",
+         "TokenBadge",
+         "TokenProgressbar",
+         "useComposerStore"
+      ],
+      "exported_symbols":[  
+         {  
+            "Composer":"This is a React component for composing and sending messages in a chat-like interface. It supports pasting text and code from the clipboard, and a local log of sent messages."
+         }
+      ]
+   }
+}
+Here is the JSON file as per your request:
+
+```json
+{  
+    "ChatModeMenu.tsx": 
+        {
+            "path": "./chat/components/composer/ChatModeMenu.tsx",
+            "purpose": "This file defines a Menu component for changing the chat mode in the AppChat context.",
+            "imported_symbols": ["React", "Box", "ListDivider", "Menu", "MenuItem", "Radio", "Typography", "ChatModeId", "ChatModeItems"],
+            "exported_symbols": [
+                {"ChatModeMenu": "A function component that renders a Menu to change the chat mode."}
+            ]
+        }
+}
+```
+========
+{  
+    "ChatModeMenu.tsx": 
+        {
+            "path": "./chat/components/composer/ChatModeMenu.tsx",
+            "purpose": "This file defines a Menu component for changing the chat mode in the AppChat context.",
+            "imported_symbols": ["React", "Box", "ListDivider", "Menu", "MenuItem", "Radio", "Typography", "ChatModeId", "ChatModeItems"],
+            "exported_symbols": [
+                {"ChatModeMenu": "A function component that renders a Menu to change the chat mode."}
+            ]
+        }
+}
+Based on your provided source file content, here is the corresponding generated JSON:
+
+```json
+{
+    "TokenBadge.tsx": {
+        "path": "./chat/components/composer/TokenBadge.tsx",
+        "purpose": "This file defines and exports a component 'TokenBadge' and function 'tokensPrettyMath'. TokenBadge is used for showing the token count with a tooltip on hover. TokensPrettyMath is used to calculate the remaining tokens and generate a display message.",
+        "imported_symbols": ["React", "Badge", "ColorPaletteProp", "Tooltip", "useTheme", "SxProps"],
+        "exported_symbols": [
+            {
+                "TokenBadge": "Component to show the token count with a tooltip on hover"
+            },
+            {
+                "tokensPrettyMath": "Function to calculate the remaining tokens and generate a display message"
+            }
+        ]
+    }
+}
+```
+
+This JSON includes the path of the file, the general purpose of the file, the list of imported symbols, and a summary of the exported symbols. The exported symbols include their names and brief descriptions.
+========
+{
+    "TokenBadge.tsx": {
+        "path": "./chat/components/composer/TokenBadge.tsx",
+        "purpose": "This file defines and exports a component 'TokenBadge' and function 'tokensPrettyMath'. TokenBadge is used for showing the token count with a tooltip on hover. TokensPrettyMath is used to calculate the remaining tokens and generate a display message.",
+        "imported_symbols": ["React", "Badge", "ColorPaletteProp", "Tooltip", "useTheme", "SxProps"],
+        "exported_symbols": [
+            {
+                "TokenBadge": "Component to show the token count with a tooltip on hover"
+            },
+            {
+                "tokensPrettyMath": "Function to calculate the remaining tokens and generate a display message"
+            }
+        ]
+    }
+}
+Based on the source file content you provided, here's the requested JSON:
+
+```json
+{
+    "Ephemerals.tsx": {
+        "path": "./chat/components/Ephemerals.tsx",
+        "purpose": "This file handles rendering of chat ephemerals including State, List, Object and Primitive types, and the Ephemeral container.",
+        "imported_symbols": [
+            "React",
+            "shallow",
+            "Box",
+            "Grid",
+            "IconButton",
+            "Sheet",
+            "Stack",
+            "styled",
+            "Typography",
+            "useTheme",
+            "SxProps",
+            "CloseIcon",
+            "DEphemeral",
+            "useChatStore"
+        ],
+        "exported_symbols": [
+            { "Ephemerals": "A component that handles all the ephemerals of a conversation, specifically in chat context." }
+        ]
+    }
+}
+```
+
+The JSON object contains key-value pairs describing the path of the file, its overall purpose, the imported and exported symbols from the file. The exported symbols also have a brief one-line explanation for each of them.
+========
+{
+    "Ephemerals.tsx": {
+        "path": "./chat/components/Ephemerals.tsx",
+        "purpose": "This file handles rendering of chat ephemerals including State, List, Object and Primitive types, and the Ephemeral container.",
+        "imported_symbols": [
+            "React",
+            "shallow",
+            "Box",
+            "Grid",
+            "IconButton",
+            "Sheet",
+            "Stack",
+            "styled",
+            "Typography",
+            "useTheme",
+            "SxProps",
+            "CloseIcon",
+            "DEphemeral",
+            "useChatStore"
+        ],
+        "exported_symbols": [
+            { "Ephemerals": "A component that handles all the ephemerals of a conversation, specifically in chat context." }
+        ]
+    }
+}
+Here is the JSON representation based on the source file you provided:
+
+```json
+{
+    "ChatMessageSelectable.tsx": {
+        "path": "./chat/components/message/ChatMessageSelectable.tsx",
+        "purpose": "This file defines two React components, MessagesSelectionHeader and ChatMessageSelectable, for controlling the operations during the Selection mode and representing a small version of a Chat Message respectively.",
+        "imported_symbols": [
+            "React", 
+            "Box", 
+            "Button", 
+            "Checkbox",
+            "IconButton", 
+            "ListItem", 
+            "Sheet", 
+            "Typography",
+            "useTheme", 
+            "ClearIcon", 
+            "DeleteOutlineIcon",
+            "DMessage", 
+            "TokenBadge", 
+            "makeAvatar",
+            "messageBackground"
+        ],
+        "exported_symbols": [
+            {
+                "MessagesSelectionHeader": "This component displays a header bar during the Selection mode. It includes a 'Select All' checkbox, and it also allows users to delete all selected messages."
+            },
+            {
+                "ChatMessageSelectable": "This component is a small representation of a ChatMessage, meant to be used in selection mode. This is designed to allow for simple checkbox based selection of messages."
+            }
+        ]
+    }
+}
+```
+
+This JSON data includes file name, file path, its general purpose, all the imported symbols and one line description for all exported symbols as per your specification.
+========
+{
+    "ChatMessageSelectable.tsx": {
+        "path": "./chat/components/message/ChatMessageSelectable.tsx",
+        "purpose": "This file defines two React components, MessagesSelectionHeader and ChatMessageSelectable, for controlling the operations during the Selection mode and representing a small version of a Chat Message respectively.",
+        "imported_symbols": [
+            "React", 
+            "Box", 
+            "Button", 
+            "Checkbox",
+            "IconButton", 
+            "ListItem", 
+            "Sheet", 
+            "Typography",
+            "useTheme", 
+            "ClearIcon", 
+            "DeleteOutlineIcon",
+            "DMessage", 
+            "TokenBadge", 
+            "makeAvatar",
+            "messageBackground"
+        ],
+        "exported_symbols": [
+            {
+                "MessagesSelectionHeader": "This component displays a header bar during the Selection mode. It includes a 'Select All' checkbox, and it also allows users to delete all selected messages."
+            },
+            {
+                "ChatMessageSelectable": "This component is a small representation of a ChatMessage, meant to be used in selection mode. This is designed to allow for simple checkbox based selection of messages."
+            }
+        ]
+    }
+}
+Based on your request, here is the JSON file:
+
+```json
+{
+    "RenderMarkdown.tsx": {
+        "path": "./chat/components/message/RenderMarkdown.tsx",
+        "purpose": "The purpose of this file is to import a variety of symbols and export the 'RenderMarkdown' function which renders markdown content.",
+        "imported_symbols": [
+            "React",
+            "Box",
+            "useTheme",
+            "TextBlock"
+        ],
+        "exported_symbols": [
+            {
+                "RenderMarkdown": "This exported component is a React component that takes a 'textBlock' prop. It renders the markdown content and applies specific styling based on the current theme mode."
+            }
+        ]
+    }
+}
+```
+========
+{
+    "RenderMarkdown.tsx": {
+        "path": "./chat/components/message/RenderMarkdown.tsx",
+        "purpose": "The purpose of this file is to import a variety of symbols and export the 'RenderMarkdown' function which renders markdown content.",
+        "imported_symbols": [
+            "React",
+            "Box",
+            "useTheme",
+            "TextBlock"
+        ],
+        "exported_symbols": [
+            {
+                "RenderMarkdown": "This exported component is a React component that takes a 'textBlock' prop. It renders the markdown content and applies specific styling based on the current theme mode."
+            }
+        ]
+    }
+}
+```
+    {
+        "OpenInReplit.tsx": 
+        {
+            "path":"./chat/components/message/OpenInReplit.tsx",
+            "purpose":"This file is a react component that allows user to open code blocks in the specified programming language with an online compiler, Replit.",
+            "imported_symbols": ["React", "Button", "Tooltip"],
+            "exported_symbols": [
+                {"OpenInReplit": "A function component that allows users to open code block in Replit by creating a link to the replit.com with the specified programming language"}
+            ]
+        }
+    }
+    ```
+========
+{
+        "OpenInReplit.tsx": 
+        {
+            "path":"./chat/components/message/OpenInReplit.tsx",
+            "purpose":"This file is a react component that allows user to open code blocks in the specified programming language with an online compiler, Replit.",
+            "imported_symbols": ["React", "Button", "Tooltip"],
+            "exported_symbols": [
+                {"OpenInReplit": "A function component that allows users to open code block in Replit by creating a link to the replit.com with the specified programming language"}
+            ]
+        }
+    }
+Here is the requested JSON file generated based on the provided TypeScript file:
+
+```json
+{
+    "RenderCode.tsx": {
+        "path": "./chat/components/message/RenderCode.tsx",
+        "purpose": "This file is to handle and manage the rendering of code, with features like SVG rendering, Codepen & Replit language support, copy to clipboard functionality, PlantUML rendering, and more.",
+        "imported_symbols": [
+            "React",
+            "useQuery",
+            "Box",
+            "IconButton",
+            "Tooltip",
+            "SxProps",
+            "ContentCopyIcon",
+            "SchemaIcon",
+            "ShapeLineOutlinedIcon",
+            "copyToClipboard",
+            "CodeBlock",
+            "OpenInCodepen",
+            "OpenInReplit"
+        ],
+        "exported_symbols": [
+            {
+                "RenderCode": "A function component for deriving how to render a given block of code, adjusting its visual display and interactive functionality to best suit the language it is written in and the type of code provided."
+            }
+        ]
+    }
+}
+``` 
+
+This JSON structure represents the general purpose of the file, all the symbols that it imports from other modules, and an exported component with a brief description.
+========
+{
+    "RenderCode.tsx": {
+        "path": "./chat/components/message/RenderCode.tsx",
+        "purpose": "This file is to handle and manage the rendering of code, with features like SVG rendering, Codepen & Replit language support, copy to clipboard functionality, PlantUML rendering, and more.",
+        "imported_symbols": [
+            "React",
+            "useQuery",
+            "Box",
+            "IconButton",
+            "Tooltip",
+            "SxProps",
+            "ContentCopyIcon",
+            "SchemaIcon",
+            "ShapeLineOutlinedIcon",
+            "copyToClipboard",
+            "CodeBlock",
+            "OpenInCodepen",
+            "OpenInReplit"
+        ],
+        "exported_symbols": [
+            {
+                "RenderCode": "A function component for deriving how to render a given block of code, adjusting its visual display and interactive functionality to best suit the language it is written in and the type of code provided."
+            }
+        ]
+    }
+}
+```json
+{
+    "RenderText.tsx": 
+    {
+        "path": "./chat/components/message/RenderText.tsx",
+        "purpose": "This file defines a React component for rendering a block of text with support for embedded commands using MUI Typography and Chip components.",
+        "imported_symbols": [
+            "React",
+            "Chip",
+            "Typography",
+            "SxProps",
+            "extractCommands",
+            "TextBlock"
+        ],
+        "exported_symbols": [
+            {
+                "RenderText": "A component that takes a text block and a style object as props, extracts commands from the text, and renders the commands as MUI Chips or plain text within a MUI Typography component."
+            }
+        ]
+    }
+}
+```
+========
+{
+    "RenderText.tsx": 
+    {
+        "path": "./chat/components/message/RenderText.tsx",
+        "purpose": "This file defines a React component for rendering a block of text with support for embedded commands using MUI Typography and Chip components.",
+        "imported_symbols": [
+            "React",
+            "Chip",
+            "Typography",
+            "SxProps",
+            "extractCommands",
+            "TextBlock"
+        ],
+        "exported_symbols": [
+            {
+                "RenderText": "A component that takes a text block and a style object as props, extracts commands from the text, and renders the commands as MUI Chips or plain text within a MUI Typography component."
+            }
+        ]
+    }
+}
+Here's the JSON content based on the provided 'RenderImage.tsx' file:
+
+```json
+{
+  "RenderImage.tsx": {
+    "path": "./chat/components/message/RenderImage.tsx",
+    "purpose": "This file defines a React component that renders an image along with additional optional interactions (like redrawing the image).",
+    "imported_symbols": [
+      "React",
+      "Box",
+      "IconButton",
+      "Tooltip",
+      "ReplayIcon",
+      "ZoomOutMapIcon",
+      "Link",
+      "ImageBlock"
+    ],
+    "exported_symbols": [
+      {
+        "RenderImage": "This is a React component which takes an image block object, a boolean to allow re-rendering of the image and a callback function for the re-render action. It displays an image with a button to run action again (if allowed) and a button to view in new tab."
+      }
+    ]
+  }
+}
+```
+========
+{
+  "RenderImage.tsx": {
+    "path": "./chat/components/message/RenderImage.tsx",
+    "purpose": "This file defines a React component that renders an image along with additional optional interactions (like redrawing the image).",
+    "imported_symbols": [
+      "React",
+      "Box",
+      "IconButton",
+      "Tooltip",
+      "ReplayIcon",
+      "ZoomOutMapIcon",
+      "Link",
+      "ImageBlock"
+    ],
+    "exported_symbols": [
+      {
+        "RenderImage": "This is a React component which takes an image block object, a boolean to allow re-rendering of the image and a callback function for the re-render action. It displays an image with a button to run action again (if allowed) and a button to view in new tab."
+      }
+    ]
+  }
+}
+Here is the JSON representation of the source file as per your specifications:
+
+```json
+{
+    "Block.tsx": {
+        "path": "./chat/components/message/Block.tsx",
+        "purpose": "This file defines several types of blocks in a chat, including text, code, image and HTML blocks. It contains a function for parsing these blocks from a string, as well as a function to infer the code language of a code block.",
+        "imported_symbols": ["Prism", "'prismjs/components/prism-bash'", "'prismjs/components/prism-css'", "'prismjs/components/prism-java'", "'prismjs/components/prism-javascript'", "'prismjs/components/prism-json'", "'prismjs/components/prism-markdown'", "'prismjs/components/prism-python'", "'prismjs/components/prism-typescript'", "'prismjs/themes/prism.css'"],
+        "exported_symbols": [
+            {"Block": "Type representing a block of content, which can be a TextBlock, CodeBlock, ImageBlock or HtmlBlock."},
+            {"TextBlock": "Type representing a block of text content."},
+            {"CodeBlock": "Type representing a block of code content, which contains code and language information."},
+            {"ImageBlock": "Type representing a block of image content, which contains an image URL."},
+            {"HtmlBlock": "Type representing a block of HTML content."},
+            {"parseBlocks": "Function that parses a string into an array of blocks (TextBlock, CodeBlock, ImageBlock, HtmlBlock) depending on the content of the string."},
+            {"inferCodeLanguage": "Function to infer the programming language of a code block. If the language cannot be inferred based on the provided hint or the start of the code, a language detection process based on tokenizing the code is used."}
+        ]
+    }
+}
+```
+========
+{
+    "Block.tsx": {
+        "path": "./chat/components/message/Block.tsx",
+        "purpose": "This file defines several types of blocks in a chat, including text, code, image and HTML blocks. It contains a function for parsing these blocks from a string, as well as a function to infer the code language of a code block.",
+        "imported_symbols": ["Prism", "'prismjs/components/prism-bash'", "'prismjs/components/prism-css'", "'prismjs/components/prism-java'", "'prismjs/components/prism-javascript'", "'prismjs/components/prism-json'", "'prismjs/components/prism-markdown'", "'prismjs/components/prism-python'", "'prismjs/components/prism-typescript'", "'prismjs/themes/prism.css'"],
+        "exported_symbols": [
+            {"Block": "Type representing a block of content, which can be a TextBlock, CodeBlock, ImageBlock or HtmlBlock."},
+            {"TextBlock": "Type representing a block of text content."},
+            {"CodeBlock": "Type representing a block of code content, which contains code and language information."},
+            {"ImageBlock": "Type representing a block of image content, which contains an image URL."},
+            {"HtmlBlock": "Type representing a block of HTML content."},
+            {"parseBlocks": "Function that parses a string into an array of blocks (TextBlock, CodeBlock, ImageBlock, HtmlBlock) depending on the content of the string."},
+            {"inferCodeLanguage": "Function to infer the programming language of a code block. If the language cannot be inferred based on the provided hint or the start of the code, a language detection process based on tokenizing the code is used."}
+        ]
+    }
+}
+Here is the JSON file you requested:
+
+```json
+{
+    "RenderHtml.tsx":{
+        "path":"./chat/components/message/RenderHtml.tsx",
+        "purpose":"File includes the implementation of a component that displays an HTML snippet as is and also provides a warning and a toggle for the user to view/unview the HTML content.",
+        "imported_symbols":["React", "Box", "Button", "IconButton", "Tooltip", "Typography", "SxProps", "WebIcon", "HtmlBlock"],
+        "exported_symbols":[
+            {"RenderHtml":"A React component which renders an HTML block. It also includes a toggle button to switch between the HTML page and caution message about the potential security risks of HTML content."}
+        ]
+    }
+}
+```
+========
+{
+    "RenderHtml.tsx":{
+        "path":"./chat/components/message/RenderHtml.tsx",
+        "purpose":"File includes the implementation of a component that displays an HTML snippet as is and also provides a warning and a toggle for the user to view/unview the HTML content.",
+        "imported_symbols":["React", "Box", "Button", "IconButton", "Tooltip", "Typography", "SxProps", "WebIcon", "HtmlBlock"],
+        "exported_symbols":[
+            {"RenderHtml":"A React component which renders an HTML block. It also includes a toggle button to switch between the HTML page and caution message about the potential security risks of HTML content."}
+        ]
+    }
+}
+Based on the provided TypeScript file, the generated JSON is as follows:
+
+```json
+{
+    "OpenInCodepen.tsx": {
+        "path": "./chat/components/message/OpenInCodepen.tsx",
+        "purpose": "This file comprises a React component OpenInCodepen that creates a button which, when clicked, sends the provided code block to Codepen in a new post.",
+        "imported_symbols": ["React", "Button", "Tooltip"],
+        "exported_symbols": [
+            {"OpenInCodepen": "A React functional component that allows code to be sent and opened in a CodePen environment"}
+        ]
+    }
+}
+```
+
+Here is how I deduced this:
+- The file path and name were given in the question: './chat/components/message/OpenInCodepen.tsx', 'OpenInCodepen.tsx'.
+- The purpose for this file can be conveyed from the implemented function of the OpenInCodepen component, which takes code from the user and opens it in a new CodePen post.
+- The imported symbols 'React', 'Button', 'Tooltip' were visible at the top of the file.
+- The exported symbol is 'OpenInCodepen'. Its description is deduced from the component's responsibilities. It takes a 'codeBlock' object as props, and creates a button that opens the code in a new CodePen post when clicked.
+========
+{
+    "OpenInCodepen.tsx": {
+        "path": "./chat/components/message/OpenInCodepen.tsx",
+        "purpose": "This file comprises a React component OpenInCodepen that creates a button which, when clicked, sends the provided code block to Codepen in a new post.",
+        "imported_symbols": ["React", "Button", "Tooltip"],
+        "exported_symbols": [
+            {"OpenInCodepen": "A React functional component that allows code to be sent and opened in a CodePen environment"}
+        ]
+    }
+}
+Here is the generated JSON file:
+
+```json
+{
+    "ChatMessage.tsx": {
+        "path": "./chat/components/message/ChatMessage.tsx",
+        "purpose": "This file defines a chat message component used in a chat application. It supports different roles (user, assistant, system), text editing, syntax highlighting and code execution. Long user messages can also be expanded or collapsed.",
+        "imported_symbols": [
+            "React", "shallow", "Alert", "Avatar", "Box", "Button", "CircularProgress", "IconButton", "ListDivider", "ListItem", "ListItemDecorator", "Menu", "MenuItem", "Stack", "Theme", "Tooltip", "Typography", "useTheme", "SxProps", "ClearIcon", "ContentCopyIcon", "EditIcon", "Face6Icon", "FastForwardIcon", "FormatPaintIcon", "MoreVertIcon", "PaletteOutlinedIcon",
+            "RecordVoiceOverIcon", "ReplayIcon", "SettingsSuggestIcon", "SmartToyOutlinedIcon", "canUseElevenLabs", "speakText", "canUseProdia", "DMessage", "InlineTextarea", "Link", "SystemPurposeId", "SystemPurposes", "copyToClipboard", "cssRainbowColorKeyframes", "prettyBaseModel", "useUIPreferencesStore", "RenderCode", "RenderHtml", "RenderImage", "RenderMarkdown", "RenderText", "parseBlocks"
+        ],
+        "exported_symbols": [
+            {
+                "messageBackground": "A utility function to get the background color for a chat message based on its role, something being edited, or if it has an unknown assistant issue. The role can be a system, a user, or an assistant."
+            },
+            {
+                "makeAvatar": "This function creates an avatar (representative image) for a chat message based on the message role, purpose, and certain other factors. The avatar could be a regular image or a GIF in case of typing status."
+            },
+            {
+                "explainErrorInMessage": "This function takes a text, checks if it's an error message from the assistant and if so, provides a user friendly error message."
+            },
+            {
+                "ChatMessage": "This is a customizable chat message UI component. It supports different roles (user, assistant, and system), text editing, syntax highlighting, and code execution. It also provides options for copying and expanding or collapsing long messages."
+            }
+        ]
+    }
+}
+```
+
+This JSON illustrates the main purpose of ChatMessage.tsx file and lists all its imported and exported symbols along with their descriptions.
+========
+{
+    "ChatMessage.tsx": {
+        "path": "./chat/components/message/ChatMessage.tsx",
+        "purpose": "This file defines a chat message component used in a chat application. It supports different roles (user, assistant, system), text editing, syntax highlighting and code execution. Long user messages can also be expanded or collapsed.",
+        "imported_symbols": [
+            "React", "shallow", "Alert", "Avatar", "Box", "Button", "CircularProgress", "IconButton", "ListDivider", "ListItem", "ListItemDecorator", "Menu", "MenuItem", "Stack", "Theme", "Tooltip", "Typography", "useTheme", "SxProps", "ClearIcon", "ContentCopyIcon", "EditIcon", "Face6Icon", "FastForwardIcon", "FormatPaintIcon", "MoreVertIcon", "PaletteOutlinedIcon",
+            "RecordVoiceOverIcon", "ReplayIcon", "SettingsSuggestIcon", "SmartToyOutlinedIcon", "canUseElevenLabs", "speakText", "canUseProdia", "DMessage", "InlineTextarea", "Link", "SystemPurposeId", "SystemPurposes", "copyToClipboard", "cssRainbowColorKeyframes", "prettyBaseModel", "useUIPreferencesStore", "RenderCode", "RenderHtml", "RenderImage", "RenderMarkdown", "RenderText", "parseBlocks"
+        ],
+        "exported_symbols": [
+            {
+                "messageBackground": "A utility function to get the background color for a chat message based on its role, something being edited, or if it has an unknown assistant issue. The role can be a system, a user, or an assistant."
+            },
+            {
+                "makeAvatar": "This function creates an avatar (representative image) for a chat message based on the message role, purpose, and certain other factors. The avatar could be a regular image or a GIF in case of typing status."
+            },
+            {
+                "explainErrorInMessage": "This function takes a text, checks if it's an error message from the assistant and if so, provides a user friendly error message."
+            },
+            {
+                "ChatMessage": "This is a customizable chat message UI component. It supports different roles (user, assistant, and system), text editing, syntax highlighting, and code execution. It also provides options for copying and expanding or collapsing long messages."
+            }
+        ]
+    }
+}
+Here is the requested JSON file:
+
+```
+{
+  "ChatMessageList.tsx": {
+    "path": "./chat/components/ChatMessageList.tsx",
+    "purpose": "This TypeScript file is responsible for displaying and managing a list of chat messages in a conversation. It also controls various operations such as message selection, message deletion, message editing, etc.",
+    "imported_symbols": [
+      "React",
+      "shallow",
+      "Box",
+      "List",
+      "SxProps",
+      "useChatLLM",
+      "createDMessage",
+      "DMessage",
+      "useChatStore",
+      "useUIPreferencesStore",
+      "ChatMessage",
+      "ChatMessageSelectable",
+      "MessagesSelectionHeader",
+      "PurposeSelector"
+    ],
+    "exported_symbols": [
+      {
+        "ChatMessageList": "A react component that provides functionalities for rendering a list of chat messages and managing various operations in a chat conversation."
+      }
+    ]
+  }
+}
+```
+========
+{
+  "ChatMessageList.tsx": {
+    "path": "./chat/components/ChatMessageList.tsx",
+    "purpose": "This TypeScript file is responsible for displaying and managing a list of chat messages in a conversation. It also controls various operations such as message selection, message deletion, message editing, etc.",
+    "imported_symbols": [
+      "React",
+      "shallow",
+      "Box",
+      "List",
+      "SxProps",
+      "useChatLLM",
+      "createDMessage",
+      "DMessage",
+      "useChatStore",
+      "useUIPreferencesStore",
+      "ChatMessage",
+      "ChatMessageSelectable",
+      "MessagesSelectionHeader",
+      "PurposeSelector"
+    ],
+    "exported_symbols": [
+      {
+        "ChatMessageList": "A react component that provides functionalities for rendering a list of chat messages and managing various operations in a chat conversation."
+      }
+    ]
+  }
+}
+Sure, here is the JSON representation of the details about the source file in question:
+
+```
+{
+  "chat/components/purpose-selector/store-purposes.ts": {
+    "path": "./chat/components/purpose-selector/store-purposes.ts",
+    "purpose": "This file defines a Zustand store for managing hidden purpose IDs. It provides functionality to toggle hiding and unhiding of purpose IDs.",
+    "imported_symbols": ["create", "persist"],
+    "exported_symbols": [
+      {
+        "usePurposeStore": "This symbol is an instance of Zustand store initialized with initial hiddenPurposeIDs as ['Designer']. It exports a function 'toggleHiddenPurposeId' for toggling the state of PurposeIds."
+      }
+    ]
+  }
+}
+```
+========
+{
+  "chat/components/purpose-selector/store-purposes.ts": {
+    "path": "./chat/components/purpose-selector/store-purposes.ts",
+    "purpose": "This file defines a Zustand store for managing hidden purpose IDs. It provides functionality to toggle hiding and unhiding of purpose IDs.",
+    "imported_symbols": ["create", "persist"],
+    "exported_symbols": [
+      {
+        "usePurposeStore": "This symbol is an instance of Zustand store initialized with initial hiddenPurposeIDs as ['Designer']. It exports a function 'toggleHiddenPurposeId' for toggling the state of PurposeIds."
+      }
+    ]
+  }
+}
+Here is the JSON file based on your source file:
+
+```json
+{  
+    "PurposeSelector.tsx": 
+    {
+        "path": "./chat/components/purpose-selector/PurposeSelector.tsx",
+        "purpose": "This file is the React component for a purpose selector for the chat. It provides an interface for user to filter and select a purpose for current chat.",
+        "imported_symbols": 
+        [
+            "React", 
+            "shallow", 
+            "Box", 
+            "Button", 
+            "Checkbox", 
+            "Grid", 
+            "IconButton", 
+            "Input",
+            "Stack",
+            "Textarea",
+            "Typography",
+            "useTheme",
+            "ClearIcon",
+            "SearchIcon",
+            "useChatStore",
+            "useUIPreferencesStore",
+            "SystemPurposeId", 
+            "SystemPurposes",
+            "usePurposeStore"
+        ],
+        "exported_symbols": [
+            {
+                "PurposeSelector": "Represents a purpose selector for the current chat. Clicking on any item activates it for the current chat."
+            }
+        ]
+    }
+}
+```
+
+In this context, the purpose selector allows the user to set the purpose for a chat. The imported symbols include various components like Box, Button, Input, and also include hooks for state management and theming. The exported symbol is the `PurposeSelector` function which is a React component.
+========
+{  
+    "PurposeSelector.tsx": 
+    {
+        "path": "./chat/components/purpose-selector/PurposeSelector.tsx",
+        "purpose": "This file is the React component for a purpose selector for the chat. It provides an interface for user to filter and select a purpose for current chat.",
+        "imported_symbols": 
+        [
+            "React", 
+            "shallow", 
+            "Box", 
+            "Button", 
+            "Checkbox", 
+            "Grid", 
+            "IconButton", 
+            "Input",
+            "Stack",
+            "Textarea",
+            "Typography",
+            "useTheme",
+            "ClearIcon",
+            "SearchIcon",
+            "useChatStore",
+            "useUIPreferencesStore",
+            "SystemPurposeId", 
+            "SystemPurposes",
+            "usePurposeStore"
+        ],
+        "exported_symbols": [
+            {
+                "PurposeSelector": "Represents a purpose selector for the current chat. Clicking on any item activates it for the current chat."
+            }
+        ]
+    }
+}
+./chat/AppChat.tsx:
+  AppChat.tsx:
+    exported_symbols:
+    - AppChat: A component that facilitates chat functionality for an application
+        including message sending, message history execution, conversation management,
+        etc.
+    imported_symbols:
+    - React
+    - shallow
+    - useTheme
+    - PublishedSchema
+    - CmdRunProdia
+    - CmdRunReact
+    - PublishedModal
+    - apiAsync
+    - imaginePromptFromText
+    - useModelsStore
+    - Brand
+    - ConfirmationModal
+    - Link
+    - conversationToMarkdown
+    - createDMessage
+    - DMessage
+    - useChatStore
+    - extractCommands
+    - useApplicationBarStore
+    - useUIPreferencesStore
+    - ChatContextItems
+    - ChatMessageList
+    - Composer
+    - ConversationItems
+    - Dropdowns
+    - Ephemerals
+    - ImportedModal
+    - ImportedOutcome
+    - restoreConversationFromJson
+    - runAssistantUpdatingState
+    - runImageGenerationUpdatingState
+    - runReActUpdatingState
+    path: ./chat/AppChat.tsx
+    purpose: This is a main chat component of the application with various functionalities
+      like managing chat history, executing AI responses, managing user interaction,
+      etc.
+./chat/components/ChatMessageList.tsx:
+  ChatMessageList.tsx:
+    exported_symbols:
+    - ChatMessageList: A react component that provides functionalities for rendering
+        a list of chat messages and managing various operations in a chat conversation.
+    imported_symbols:
+    - React
+    - shallow
+    - Box
+    - List
+    - SxProps
+    - useChatLLM
+    - createDMessage
+    - DMessage
+    - useChatStore
+    - useUIPreferencesStore
+    - ChatMessage
+    - ChatMessageSelectable
+    - MessagesSelectionHeader
+    - PurposeSelector
+    path: ./chat/components/ChatMessageList.tsx
+    purpose: This TypeScript file is responsible for displaying and managing a list
+      of chat messages in a conversation. It also controls various operations such
+      as message selection, message deletion, message editing, etc.
+./chat/components/Ephemerals.tsx:
+  Ephemerals.tsx:
+    exported_symbols:
+    - Ephemerals: A component that handles all the ephemerals of a conversation, specifically
+        in chat context.
+    imported_symbols:
+    - React
+    - shallow
+    - Box
+    - Grid
+    - IconButton
+    - Sheet
+    - Stack
+    - styled
+    - Typography
+    - useTheme
+    - SxProps
+    - CloseIcon
+    - DEphemeral
+    - useChatStore
+    path: ./chat/components/Ephemerals.tsx
+    purpose: This file handles rendering of chat ephemerals including State, List,
+      Object and Primitive types, and the Ephemeral container.
+./chat/components/appbar/ChatContextItems.tsx:
+  ChatContextItems.tsx:
+    exported_symbols:
+    - ChatContextItems: This function component allows interactions related to context
+        menu in a chat application, such as system message toggle, conversation data
+        download, sharing conversation and clearing conversation.
+    imported_symbols:
+    - React
+    - shallow
+    - ListDivider
+    - ListItem
+    - ListItemDecorator
+    - MenuItem
+    - Switch
+    - Typography
+    - CheckBoxOutlineBlankOutlinedIcon
+    - CheckBoxOutlinedIcon
+    - ClearIcon
+    - ExitToAppIcon
+    - FileDownloadIcon
+    - SettingsSuggestIcon
+    - useApplicationBarStore
+    - useChatStore
+    - useUIPreferencesStore
+    - downloadConversationJson
+    path: ./chat/components/appbar/ChatContextItems.tsx
+    purpose: This React component file defines chat context menu aspects, containing
+      different elements and operations such as System Message toggle, Conversation
+      Publish, and Download, Toggle Message Selection Mode and Conversation Clear.
+./chat/components/appbar/ConversationItem.tsx:
+  ConversationItem.tsx:
+    exported_symbols:
+    - ConversationItem: The main component of this file, allows user to manage their
+        chat in a particular conversation, including activating the conversation,
+        editing title, or deleting the conversation.
+    imported_symbols:
+    - React
+    - shallow
+    - Avatar
+    - Box
+    - IconButton
+    - ListItemDecorator
+    - MenuItem
+    - Typography
+    - SxProps
+    - CloseIcon
+    - DeleteOutlineIcon
+    - DConversation
+    - useChatStore
+    - InlineTextarea
+    - useUIPreferencesStore
+    - SystemPurposes
+    path: ./chat/components/appbar/ConversationItem.tsx
+    purpose: This file defines a Component named ConversationItem, which manages user
+      chat interactions in a particular conversation, allowing the user to activate
+      a conversation, edit the conversation title, and delete a conversation.
+./chat/components/appbar/ConversationItems.tsx:
+  ConversationItems.tsx:
+    exported_symbols:
+    - ConversationItems: A React component that provides a list of 'ConversationItems'
+        along with providing functionality of creation, activation, deletion, importing,
+        and display of conversation symbols of individual conversation instances.
+    imported_symbols:
+    - React
+    - shallow
+    - Box
+    - ListDivider
+    - ListItemDecorator
+    - MenuItem
+    - Tooltip
+    - Typography
+    - AddIcon
+    - DeleteOutlineIcon
+    - FileUploadIcon
+    - MAX_CONVERSATIONS
+    - useChatStore
+    - useApplicationBarStore
+    - useUIPreferencesStore
+    - ConversationItem
+    path: ./chat/components/appbar/ConversationItems.tsx
+    purpose: This file defines the 'ConversationItems' React component, and it shows
+      the list of conversation items along with the functionality such as creation
+      of new conversation, activation of conversation, deletion of conversation, importing
+      of conversation, display of conversation symbols, etc.
+./chat/components/appbar/Dropdowns.tsx:
+  Dropdowns.tsx:
+    exported_symbols:
+    - Dropdowns: React functional component used as an enhanced version of dropdown
+        that includes Buttons and AppBarDropdown for different states and events.
+    imported_symbols:
+    - React
+    - shallow
+    - ListItemButton
+    - ListItemDecorator
+    - Typography
+    - BuildCircleIcon
+    - SettingsIcon
+    - DLLMId
+    - SystemPurposeId
+    - SystemPurposes
+    - useModelsStore
+    - AppBarDropdown
+    - DropdownItems
+    - useChatStore
+    - useUIPreferencesStore
+    - useUIStateStore
+    path: ./chat/components/appbar/Dropdowns.tsx
+    purpose: This file is used to create dropdowns for chat models and system purposes
+      inside a chat app bar.
+./chat/components/appbar/ImportedModal.tsx:
+  ImportedModal.tsx:
+    exported_symbols:
+    - ImportedOutcome: An interface that defines the type of outcome after conversations
+        are imported.
+    - ImportedModal: A function that takes in an outcome of imported conversations
+        and displays the results in a modal dialog.
+    imported_symbols:
+    - React
+    - Box
+    - Button
+    - Divider
+    - List
+    - ListItem
+    - Modal
+    - ModalDialog
+    - Typography
+    path: ./chat/components/appbar/ImportedModal.tsx
+    purpose: Displays the result of an import operation as a modal dialog. Import
+      operations supported are JSON Chat.
+./chat/components/composer/ChatModeMenu.tsx:
+  ChatModeMenu.tsx:
+    exported_symbols:
+    - ChatModeMenu: A function component that renders a Menu to change the chat mode.
+    imported_symbols:
+    - React
+    - Box
+    - ListDivider
+    - Menu
+    - MenuItem
+    - Radio
+    - Typography
+    - ChatModeId
+    - ChatModeItems
+    path: ./chat/components/composer/ChatModeMenu.tsx
+    purpose: This file defines a Menu component for changing the chat mode in the
+      AppChat context.
+./chat/components/composer/Composer.tsx:
+  Composer.tsx:
+    exported_symbols:
+    - Composer: This is a React component for composing and sending messages in a
+        chat-like interface. It supports pasting text and code from the clipboard,
+        and a local log of sent messages.
+    imported_symbols:
+    - React
+    - shallow
+    - Box
+    - Button
+    - ButtonGroup
+    - Card
+    - Grid
+    - IconButton
+    - ListDivider
+    - ListItemDecorator
+    - Menu
+    - MenuItem
+    - Stack
+    - Textarea
+    - Tooltip
+    - Typography
+    - useTheme
+    - ColorPaletteProp
+    - SxProps
+    - VariantProp
+    - ContentPasteGoIcon
+    - DataArrayIcon
+    - DeleteOutlineIcon
+    - ExpandLessIcon
+    - FormatAlignCenterIcon
+    - KeyboardArrowUpIcon
+    - MicIcon
+    - PanToolIcon
+    - PictureAsPdfIcon
+    - PsychologyIcon
+    - SendIcon
+    - StopOutlinedIcon
+    - TelegramIcon
+    - UploadFileIcon
+    - ContentReducer
+    - useChatLLM
+    - ConfirmationModal
+    - useSpeechRecognition
+    - countModelTokens
+    - extractFilePathsWithCommonRadix
+    - hideOnDesktop
+    - hideOnMobile
+    - htmlTableToMarkdown
+    - pdfToText
+    - useChatStore
+    - useUIPreferencesStore
+    - ChatModeId
+    - ChatModeMenu
+    - TokenBadge
+    - TokenProgressbar
+    - useComposerStore
+    path: ./chat/components/composer
+    purpose: This file is a React component for composing and sending messages in
+      a chat interface. It supports text and code pasting from the clipboard, and
+      a local log of sent messages.
+./chat/components/composer/TokenBadge.tsx:
+  TokenBadge.tsx:
+    exported_symbols:
+    - TokenBadge: Component to show the token count with a tooltip on hover
+    - tokensPrettyMath: Function to calculate the remaining tokens and generate a
+        display message
+    imported_symbols:
+    - React
+    - Badge
+    - ColorPaletteProp
+    - Tooltip
+    - useTheme
+    - SxProps
+    path: ./chat/components/composer/TokenBadge.tsx
+    purpose: This file defines and exports a component 'TokenBadge' and function 'tokensPrettyMath'.
+      TokenBadge is used for showing the token count with a tooltip on hover. TokensPrettyMath
+      is used to calculate the remaining tokens and generate a display message.
+./chat/components/composer/TokenProgressbar.tsx:
+  TokenProgressbar.tsx:
+    exported_symbols:
+    - TokenProgressbar: A progress bar component for different types of tokens, handle
+        overflows and sizing, comes with tooltip
+    imported_symbols:
+    - React
+    - Box
+    - ToolTip
+    - useTheme
+    - tokensPrettyMath
+    path: ./chat/components/composer/TokenProgressbar.tsx
+    purpose: This component works as a progress bar for token history, direct tokens,
+      and response tokens with overlimit checks, it appears within the Composer
+./chat/components/composer/store-composer.ts:
+  store-composer.ts:
+    exported_symbols:
+    - useComposerStore: This is a Zustand store that manages the state of a Composer
+        component.
+    imported_symbols:
+    - create
+    - persist
+    path: ./chat/components/composer/store-composer.ts
+    purpose: This file is used to manage the state of the Composer component, including
+      sent messages and startup text.
+./chat/components/message/Block.tsx:
+  Block.tsx:
+    exported_symbols:
+    - Block: Type representing a block of content, which can be a TextBlock, CodeBlock,
+        ImageBlock or HtmlBlock.
+    - TextBlock: Type representing a block of text content.
+    - CodeBlock: Type representing a block of code content, which contains code and
+        language information.
+    - ImageBlock: Type representing a block of image content, which contains an image
+        URL.
+    - HtmlBlock: Type representing a block of HTML content.
+    - parseBlocks: Function that parses a string into an array of blocks (TextBlock,
+        CodeBlock, ImageBlock, HtmlBlock) depending on the content of the string.
+    - inferCodeLanguage: Function to infer the programming language of a code block.
+        If the language cannot be inferred based on the provided hint or the start
+        of the code, a language detection process based on tokenizing the code is
+        used.
+    imported_symbols:
+    - Prism
+    - '''prismjs/components/prism-bash'''
+    - '''prismjs/components/prism-css'''
+    - '''prismjs/components/prism-java'''
+    - '''prismjs/components/prism-javascript'''
+    - '''prismjs/components/prism-json'''
+    - '''prismjs/components/prism-markdown'''
+    - '''prismjs/components/prism-python'''
+    - '''prismjs/components/prism-typescript'''
+    - '''prismjs/themes/prism.css'''
+    path: ./chat/components/message/Block.tsx
+    purpose: This file defines several types of blocks in a chat, including text,
+      code, image and HTML blocks. It contains a function for parsing these blocks
+      from a string, as well as a function to infer the code language of a code block.
+./chat/components/message/ChatMessage.tsx:
+  ChatMessage.tsx:
+    exported_symbols:
+    - messageBackground: A utility function to get the background color for a chat
+        message based on its role, something being edited, or if it has an unknown
+        assistant issue. The role can be a system, a user, or an assistant.
+    - makeAvatar: This function creates an avatar (representative image) for a chat
+        message based on the message role, purpose, and certain other factors. The
+        avatar could be a regular image or a GIF in case of typing status.
+    - explainErrorInMessage: This function takes a text, checks if it's an error message
+        from the assistant and if so, provides a user friendly error message.
+    - ChatMessage: This is a customizable chat message UI component. It supports different
+        roles (user, assistant, and system), text editing, syntax highlighting, and
+        code execution. It also provides options for copying and expanding or collapsing
+        long messages.
+    imported_symbols:
+    - React
+    - shallow
+    - Alert
+    - Avatar
+    - Box
+    - Button
+    - CircularProgress
+    - IconButton
+    - ListDivider
+    - ListItem
+    - ListItemDecorator
+    - Menu
+    - MenuItem
+    - Stack
+    - Theme
+    - Tooltip
+    - Typography
+    - useTheme
+    - SxProps
+    - ClearIcon
+    - ContentCopyIcon
+    - EditIcon
+    - Face6Icon
+    - FastForwardIcon
+    - FormatPaintIcon
+    - MoreVertIcon
+    - PaletteOutlinedIcon
+    - RecordVoiceOverIcon
+    - ReplayIcon
+    - SettingsSuggestIcon
+    - SmartToyOutlinedIcon
+    - canUseElevenLabs
+    - speakText
+    - canUseProdia
+    - DMessage
+    - InlineTextarea
+    - Link
+    - SystemPurposeId
+    - SystemPurposes
+    - copyToClipboard
+    - cssRainbowColorKeyframes
+    - prettyBaseModel
+    - useUIPreferencesStore
+    - RenderCode
+    - RenderHtml
+    - RenderImage
+    - RenderMarkdown
+    - RenderText
+    - parseBlocks
+    path: ./chat/components/message/ChatMessage.tsx
+    purpose: This file defines a chat message component used in a chat application.
+      It supports different roles (user, assistant, system), text editing, syntax
+      highlighting and code execution. Long user messages can also be expanded or
+      collapsed.
+./chat/components/message/ChatMessageSelectable.tsx:
+  ChatMessageSelectable.tsx:
+    exported_symbols:
+    - MessagesSelectionHeader: This component displays a header bar during the Selection
+        mode. It includes a 'Select All' checkbox, and it also allows users to delete
+        all selected messages.
+    - ChatMessageSelectable: This component is a small representation of a ChatMessage,
+        meant to be used in selection mode. This is designed to allow for simple checkbox
+        based selection of messages.
+    imported_symbols:
+    - React
+    - Box
+    - Button
+    - Checkbox
+    - IconButton
+    - ListItem
+    - Sheet
+    - Typography
+    - useTheme
+    - ClearIcon
+    - DeleteOutlineIcon
+    - DMessage
+    - TokenBadge
+    - makeAvatar
+    - messageBackground
+    path: ./chat/components/message/ChatMessageSelectable.tsx
+    purpose: This file defines two React components, MessagesSelectionHeader and ChatMessageSelectable,
+      for controlling the operations during the Selection mode and representing a
+      small version of a Chat Message respectively.
+./chat/components/message/OpenInCodepen.tsx:
+  OpenInCodepen.tsx:
+    exported_symbols:
+    - OpenInCodepen: A React functional component that allows code to be sent and
+        opened in a CodePen environment
+    imported_symbols:
+    - React
+    - Button
+    - Tooltip
+    path: ./chat/components/message/OpenInCodepen.tsx
+    purpose: This file comprises a React component OpenInCodepen that creates a button
+      which, when clicked, sends the provided code block to Codepen in a new post.
+./chat/components/message/OpenInReplit.tsx:
+  OpenInReplit.tsx:
+    exported_symbols:
+    - OpenInReplit: A function component that allows users to open code block in Replit
+        by creating a link to the replit.com with the specified programming language
+    imported_symbols:
+    - React
+    - Button
+    - Tooltip
+    path: ./chat/components/message/OpenInReplit.tsx
+    purpose: This file is a react component that allows user to open code blocks in
+      the specified programming language with an online compiler, Replit.
+./chat/components/message/RenderCode.tsx:
+  RenderCode.tsx:
+    exported_symbols:
+    - RenderCode: A function component for deriving how to render a given block of
+        code, adjusting its visual display and interactive functionality to best suit
+        the language it is written in and the type of code provided.
+    imported_symbols:
+    - React
+    - useQuery
+    - Box
+    - IconButton
+    - Tooltip
+    - SxProps
+    - ContentCopyIcon
+    - SchemaIcon
+    - ShapeLineOutlinedIcon
+    - copyToClipboard
+    - CodeBlock
+    - OpenInCodepen
+    - OpenInReplit
+    path: ./chat/components/message/RenderCode.tsx
+    purpose: This file is to handle and manage the rendering of code, with features
+      like SVG rendering, Codepen & Replit language support, copy to clipboard functionality,
+      PlantUML rendering, and more.
+./chat/components/message/RenderHtml.tsx:
+  RenderHtml.tsx:
+    exported_symbols:
+    - RenderHtml: A React component which renders an HTML block. It also includes
+        a toggle button to switch between the HTML page and caution message about
+        the potential security risks of HTML content.
+    imported_symbols:
+    - React
+    - Box
+    - Button
+    - IconButton
+    - Tooltip
+    - Typography
+    - SxProps
+    - WebIcon
+    - HtmlBlock
+    path: ./chat/components/message/RenderHtml.tsx
+    purpose: File includes the implementation of a component that displays an HTML
+      snippet as is and also provides a warning and a toggle for the user to view/unview
+      the HTML content.
+./chat/components/message/RenderImage.tsx:
+  RenderImage.tsx:
+    exported_symbols:
+    - RenderImage: This is a React component which takes an image block object, a
+        boolean to allow re-rendering of the image and a callback function for the
+        re-render action. It displays an image with a button to run action again (if
+        allowed) and a button to view in new tab.
+    imported_symbols:
+    - React
+    - Box
+    - IconButton
+    - Tooltip
+    - ReplayIcon
+    - ZoomOutMapIcon
+    - Link
+    - ImageBlock
+    path: ./chat/components/message/RenderImage.tsx
+    purpose: This file defines a React component that renders an image along with
+      additional optional interactions (like redrawing the image).
+./chat/components/message/RenderMarkdown.tsx:
+  RenderMarkdown.tsx:
+    exported_symbols:
+    - RenderMarkdown: This exported component is a React component that takes a 'textBlock'
+        prop. It renders the markdown content and applies specific styling based on
+        the current theme mode.
+    imported_symbols:
+    - React
+    - Box
+    - useTheme
+    - TextBlock
+    path: ./chat/components/message/RenderMarkdown.tsx
+    purpose: The purpose of this file is to import a variety of symbols and export
+      the 'RenderMarkdown' function which renders markdown content.
+./chat/components/message/RenderText.tsx:
+  RenderText.tsx:
+    exported_symbols:
+    - RenderText: A component that takes a text block and a style object as props,
+        extracts commands from the text, and renders the commands as MUI Chips or
+        plain text within a MUI Typography component.
+    imported_symbols:
+    - React
+    - Chip
+    - Typography
+    - SxProps
+    - extractCommands
+    - TextBlock
+    path: ./chat/components/message/RenderText.tsx
+    purpose: This file defines a React component for rendering a block of text with
+      support for embedded commands using MUI Typography and Chip components.
+./chat/components/purpose-selector/PurposeSelector.tsx:
+  PurposeSelector.tsx:
+    exported_symbols:
+    - PurposeSelector: Represents a purpose selector for the current chat. Clicking
+        on any item activates it for the current chat.
+    imported_symbols:
+    - React
+    - shallow
+    - Box
+    - Button
+    - Checkbox
+    - Grid
+    - IconButton
+    - Input
+    - Stack
+    - Textarea
+    - Typography
+    - useTheme
+    - ClearIcon
+    - SearchIcon
+    - useChatStore
+    - useUIPreferencesStore
+    - SystemPurposeId
+    - SystemPurposes
+    - usePurposeStore
+    path: ./chat/components/purpose-selector/PurposeSelector.tsx
+    purpose: This file is the React component for a purpose selector for the chat.
+      It provides an interface for user to filter and select a purpose for current
+      chat.
+./chat/components/purpose-selector/store-purposes.ts:
+  chat/components/purpose-selector/store-purposes.ts:
+    exported_symbols:
+    - usePurposeStore: This symbol is an instance of Zustand store initialized with
+        initial hiddenPurposeIDs as ['Designer']. It exports a function 'toggleHiddenPurposeId'
+        for toggling the state of PurposeIds.
+    imported_symbols:
+    - create
+    - persist
+    path: ./chat/components/purpose-selector/store-purposes.ts
+    purpose: This file defines a Zustand store for managing hidden purpose IDs. It
+      provides functionality to toggle hiding and unhiding of purpose IDs.
+./chat/editors/chat-stream.ts:
+  chat-stream.ts:
+    exported_symbols:
+    - runAssistantUpdatingState: An async function that manages the state of the assistant
+        by starting to type, streaming the assistant's message, and updating the chat
+        title if needed.
+    - streamAssistantMessage: An internal async function that streams the assistant's
+        message, dealing with message modifications, the assistant's speech, and error
+        handling.
+    imported_symbols:
+    - ChatGenerateSchema
+    - DLLMId
+    - LLMOptionsOpenAI
+    - normalizeOAISetup
+    - SourceSetupOpenAI
+    - OpenAI
+    - SystemPurposeId
+    - apiAsync
+    - autoTitle
+    - findLLMOrThrow
+    - speakText
+    - useElevenlabsStore
+    - DMessage
+    - useChatStore
+    - createAssistantTypingMessage
+    - updatePurposeInHistory
+    path: ./chat/editors/chat-stream.ts
+    purpose: This file is responsible for managing the chat stream of an AI assistant,
+      which includes generating, streaming, and updating chat messages; and configuring
+      the AI output.
+./chat/editors/editors.ts:
+  editors.ts:
+    exported_symbols:
+    - createAssistantTypingMessage: This function creates a 'typing' message generated
+        by the assistant, appends it to the chat, and returns the message's ID.
+    - updatePurposeInHistory: This function searches for a system message in the chat
+        history, updates its purpose ID and corresponding text if needed, updates
+        the chat history to contain the updated system message at start, and returns
+        the updated history.
+    imported_symbols:
+    - DLLMId
+    - SystemPurposeId
+    - SystemPurposes
+    - createDMessage
+    - DMessage
+    - useChatStore
+    path: ./chat/editors/editors.ts
+    purpose: This file mainly handles the creation and updating of assistant and system
+      messages within a chat.
+./chat/editors/image-generate.ts:
+  image-generate.ts:
+    exported_symbols:
+    - runImageGenerationUpdatingState: This function asynchronously fetches an image
+        URL based on the provided text and updates the assistant's message in the
+        chat store. In case of an error, it updates the message with an appropriate
+        error text.
+    imported_symbols:
+    - apiAsync
+    - prodiaDefaultModelId
+    - useProdiaStore
+    - useChatStore
+    - createAssistantTypingMessage
+    path: ./chat/editors/image-generate.ts
+    purpose: This file contains a function for running image generation and updating
+      the chat state based on the 'imagine' command.
+./chat/editors/react-tangent.ts:
+  react-tangent.ts:
+    exported_symbols:
+    - runReActUpdatingState: This function synchronizes the state during the chat
+        conversation. It manages the message flow, creates and updates temporary messages
+        and handles possible errors during a conversation. The function also logs
+        chat activities.
+    imported_symbols:
+    - Agent
+    - DLLMId
+    - createDEphemeral
+    - DMessage
+    - useChatStore
+    - createAssistantTypingMessage
+    path: ./chat/editors/react-tangent.ts
+    purpose: This file is used to create and manage the chat behavior of an AI agent
+      in a conversation. It enables asynchronous communication, the use of temporary
+      messages, and handles errors during a conversation.
+./chat/exportImport.ts:
+  exportImport.ts:
+    exported_symbols:
+    - downloadConversationJson: This function is used to download a conversation as
+        a JSON file.
+    - restoreConversationFromJson: This function is used to restore a conversation
+        from a JSON string.
+    imported_symbols:
+    - defaultSystemPurposeId
+    - DConversation
+    path: ./chat/exportImport.ts
+    purpose: This file exports two functions -- one for downloading a conversation
+      as a JSON file and another for restoring a conversation from a JSON string.
+
