@@ -10,9 +10,6 @@ import 'prismjs/components/prism-markdown';
 import 'prismjs/components/prism-python';
 import 'prismjs/components/prism-typescript';
 
-// theme
-import 'prismjs/themes/prism.css';
-
 
 export type Block = TextBlock | CodeBlock | ImageBlock | HtmlBlock;
 export type TextBlock = { type: 'text'; content: string; };
@@ -28,7 +25,7 @@ export const parseBlocks = (forceText: boolean, text: string): Block[] => {
   if (forceText)
     return [{ type: 'text', content: text }];
 
-  if (text.startsWith('https://images.prodia.xyz/') && text.endsWith('.png') && text.length > 60 && text.length < 70)
+  if (text.startsWith('https://images.prodia.xyz/') && text.endsWith('.png') && text.length > 60)
     return [{ type: 'image', url: text.trim() }];
 
   if (text.startsWith('<!DOCTYPE html') || text.startsWith('<head>\n'))

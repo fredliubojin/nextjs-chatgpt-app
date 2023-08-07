@@ -6,6 +6,7 @@ import { useTheme } from '@mui/joy';
 import type { PublishedSchema } from '~/modules/publish/publish.router';
 import { CmdRunProdia } from '~/modules/prodia/prodia.client';
 import { CmdRunReact } from '~/modules/aifn/react/react';
+import { FlattenerModal } from '~/modules/aifn/flatten/FlattenerModal';
 import { PublishedModal } from '~/modules/publish/PublishedModal';
 import { apiAsync } from '~/modules/trpc/trpc.client';
 import { imaginePromptFromText } from '~/modules/aifn/imagine/imaginePromptFromText';
@@ -16,14 +17,14 @@ import { ConfirmationModal } from '~/common/components/ConfirmationModal';
 import { Link } from '~/common/components/Link';
 import { conversationToMarkdown } from '~/common/util/conversationToMarkdown';
 import { createDMessage, DMessage, useChatStore } from '~/common/state/store-chats';
-import { extractCommands } from '~/common/util/extractCommands';
 import { useApplicationBarStore } from '~/common/layouts/appbar/store-applicationbar';
 import { useUIPreferencesStore } from '~/common/state/store-ui';
 
 import { ChatContextItems } from './components/appbar/ChatContextItems';
 import { ChatMessageList } from './components/ChatMessageList';
+import { CmdAddRoleMessage, extractCommands } from './commands';
 import { Composer } from './components/composer/Composer';
-import { ConversationItems } from './components/appbar/ConversationItems';
+import { ConversationsList } from './components/appbar/ConversationsList';
 import { Dropdowns } from './components/appbar/Dropdowns';
 import { Ephemerals } from './components/Ephemerals';
 import { ImportedModal, ImportedOutcome } from './components/appbar/ImportedModal';
@@ -77,6 +78,7 @@ export function AppChat() {
   const [isMessageSelectionMode, setIsMessageSelectionMode] = React.useState(false);
   const [clearConfirmationId, setClearConfirmationId] = React.useState<string | null>(null);
   const [deleteConfirmationId, setDeleteConfirmationId] = React.useState<string | null>(null);
+  const [flattenConversationId, setFlattenConversationId] = React.useState<string | null>(null);
   const [publishConversationId, setPublishConversationId] = React.useState<string | null>(null);
   const [publishResponse, setPublishResponse] = React.useState<PublishedSchema | null>(null);
   const [conversationImportOutcome, setConversationImportOutcome] = React.useState<ImportedOutcome | null>(null);
@@ -84,12 +86,13 @@ export function AppChat() {
 
   // external state
   const theme = useTheme();
-  const { activeConversationId, isConversationEmpty, conversationsCount, importConversation, deleteAllConversations, setMessages, systemPurposeId, setAutoTitle } = useChatStore(state => {
+  const { activeConversationId, isConversationEmpty, conversationsCount, duplicateConversation, importConversation, deleteAllConversations, setMessages, systemPurposeId, setAutoTitle } = useChatStore(state => {
     const conversation = state.conversations.find(conversation => conversation.id === state.activeConversationId);
     return {
       activeConversationId: state.activeConversationId,
       isConversationEmpty: conversation ? !conversation.messages.length : true,
       conversationsCount: state.conversations.length,
+      duplicateConversation: state.duplicateConversation,
       importConversation: state.importConversation,
       deleteAllConversations: state.deleteAllConversations,
       setMessages: state.setMessages,
@@ -118,6 +121,12 @@ export function AppChat() {
           setMessages(conversationId, history);
           return await runReActUpdatingState(conversationId, prompt, chatLLMId);
         }
+        if (CmdAddRoleMessage.includes(command)) {
+          lastMessage.role = command.startsWith('/s') ? 'system' : command.startsWith('/a') ? 'assistant' : 'user';
+          lastMessage.sender = 'Bot';
+          lastMessage.text = prompt;
+          return setMessages(conversationId, history);
+        }
       }
     }
 
@@ -139,6 +148,7 @@ export function AppChat() {
     }
 
     // ISSUE: if we're here, it means we couldn't do the job, at least sync the history
+    console.log('handleExecuteConversation: issue running', conversationId, lastMessage);
     setMessages(conversationId, history);
   };
 
@@ -185,6 +195,8 @@ export function AppChat() {
       setDeleteConfirmationId(null);
     }
   };
+
+  const handleFlattenConversation = (conversationId: string) => setFlattenConversationId(conversationId);
 
   const handlePublishConversation = (conversationId: string) => setPublishConversationId(conversationId);
 
@@ -255,7 +267,7 @@ export function AppChat() {
   const conversationsBadge = conversationsCount < 2 ? 0 : conversationsCount;
 
   const conversationItems = React.useMemo(() =>
-      <ConversationItems
+      <ConversationsList
         conversationId={activeConversationId}
         onImportConversation={handleImportConversation}
         onDeleteAllConversations={handleDeleteAllConversations}
@@ -268,9 +280,11 @@ export function AppChat() {
         conversationId={activeConversationId} isConversationEmpty={isConversationEmpty}
         isMessageSelectionMode={isMessageSelectionMode} setIsMessageSelectionMode={setIsMessageSelectionMode}
         onClearConversation={handleClearConversation}
+        onDuplicateConversation={duplicateConversation}
+        onFlattenConversation={handleFlattenConversation}
         onPublishConversation={handlePublishConversation}
       />,
-    [activeConversationId, isConversationEmpty, isMessageSelectionMode],
+    [activeConversationId, duplicateConversation, isConversationEmpty, isMessageSelectionMode],
   );
 
   React.useEffect(() => {
@@ -336,6 +350,9 @@ export function AppChat() {
         ? 'Yes, delete all'
         : 'Delete conversation'}
     />
+
+    {/* Flatten */}
+    {!!flattenConversationId && <FlattenerModal conversationId={flattenConversationId} onClose={() => setFlattenConversationId(null)} />}
 
     {/* Publishing */}
     <ConfirmationModal

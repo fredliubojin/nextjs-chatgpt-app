@@ -20,18 +20,18 @@ const accessSchema = z.object({
   moderationCheck: z.boolean(),
 });
 
-const modelSchema = z.object({
+export const modelSchema = z.object({
   id: z.string(),
   temperature: z.number().min(0).max(1).optional(),
-  maxTokens: z.number().min(1).max(100000).optional(),
+  maxTokens: z.number().min(1).max(1000000),
 });
 
-const historySchema = z.array(z.object({
+export const historySchema = z.array(z.object({
   role: z.enum(['assistant', 'system', 'user'/*, 'function'*/]),
   content: z.string(),
 }));
 
-const functionsSchema = z.array(z.object({
+export const functionsSchema = z.array(z.object({
   name: z.string(),
   description: z.string().optional(),
   parameters: z.object({
@@ -45,12 +45,19 @@ const functionsSchema = z.array(z.object({
   }).optional(),
 }));
 
-export const chatGenerateSchema = z.object({ access: accessSchema, model: modelSchema, history: historySchema, functions: functionsSchema.optional() });
-export type ChatGenerateSchema = z.infer<typeof chatGenerateSchema>;
+export const chatStreamSchema = z.object({
+  vendorId: z.enum(['anthropic', 'openai']),
+  // shall clean this up a bit
+  access: z.union([accessSchema, z.object({ anthropicKey: z.string().trim(), anthropicHost: z.string().trim() })]),
+  model: modelSchema, history: historySchema, functions: functionsSchema.optional(),
+});
+export type ChatStreamSchema = z.infer<typeof chatStreamSchema>;
 
-const listModelsSchema = z.object({ access: accessSchema, filterGpt: z.boolean().optional() });
+const chatGenerateSchema = z.object({ access: accessSchema, model: modelSchema, history: historySchema, functions: functionsSchema.optional() });
 
 const chatModerationSchema = z.object({ access: accessSchema, text: z.string() });
+
+const listModelsSchema = z.object({ access: accessSchema, filterGpt: z.boolean().optional() });
 
 
 // Output Schemas
@@ -68,7 +75,7 @@ const chatGenerateWithFunctionsOutputSchema = z.union([
 ]);
 
 
-export const openAIRouter = createTRPCRouter({
+export const llmOpenAIRouter = createTRPCRouter({
 
   /**
    * Chat-based message generation
@@ -90,7 +97,11 @@ export const openAIRouter = createTRPCRouter({
       // expect a single output
       if (wireCompletions?.choices?.length !== 1)
         throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: `[OpenAI Issue] Expected 1 completion, got ${wireCompletions?.choices?.length}` });
-      const { message, finish_reason } = wireCompletions.choices[0];
+      let { message, finish_reason } = wireCompletions.choices[0];
+
+      // LocalAI hack/workaround, until https://github.com/go-skynet/LocalAI/issues/788 is fixed
+      if (finish_reason === undefined)
+        finish_reason = 'stop';
 
       // check for a function output
       return finish_reason === 'function_call'
@@ -172,33 +183,41 @@ type FunctionsSchema = z.infer<typeof functionsSchema>;
 
 async function openaiGET<TOut>(access: AccessSchema, apiPath: string /*, signal?: AbortSignal*/): Promise<TOut> {
   const { headers, url } = openAIAccess(access, apiPath);
-  const response = await fetch(url, { headers });
-  return await response.json() as TOut;
+  return await fetchOrTRPCError<undefined, TOut>(url, 'GET', headers, undefined, 'OpenAI');
 }
 
 async function openaiPOST<TBody, TOut>(access: AccessSchema, body: TBody, apiPath: string /*, signal?: AbortSignal*/): Promise<TOut> {
   const { headers, url } = openAIAccess(access, apiPath);
-  const response = await fetch(url, { headers, method: 'POST', body: JSON.stringify(body) });
+  return await fetchOrTRPCError<TBody, TOut>(url, 'POST', headers, body, 'OpenAI');
+}
+
+/**
+ * Post from TRPC
+ */
+export async function fetchOrTRPCError<TBody, TOut>(url: string, method: 'GET' | 'POST', headers: HeadersInit, body: TBody | undefined, moduleName: string): Promise<TOut> {
+  const response = await fetch(url, { method, headers, ...(body !== undefined ? { body: JSON.stringify(body) } : {}) });
   if (!response.ok) {
-    let error: any | null = null;
-    try {
-      error = await response.json();
-    } catch (e) {
-      // ignore
-    }
+    const error: any | null = await response.json().catch(() => null);
+    // console.log('fetchOrTRPCError', url, error);
     throw new TRPCError({
       code: 'BAD_REQUEST',
       message: error
-        ? `[OpenAI Issue] ${error?.error?.message || error?.error || error?.toString() || 'Unknown error'}`
-        : `[Issue] ${response.statusText}`,
+        ? `[${moduleName} Issue] ${error?.error?.message || error?.error || error?.toString() || 'Unknown http error'}`
+        : `[Issue] ${response.statusText} (${response.status})` + (response.status === 403 ? ` - is ${url} accessible by the server?` : ''),
     });
   }
   try {
-    return await response.json();
+    return await response.json() as TOut;
   } catch (error: any) {
-    throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: `[OpenAI Issue] ${error?.message || error}` });
+    throw new TRPCError({
+      code: 'INTERNAL_SERVER_ERROR',
+      message: `[${moduleName} Issue] ${error?.message || error?.toString() || 'Unknown json error'}`,
+    });
   }
 }
+
+
+const DEFAULT_OPENAI_HOST = 'api.openai.com';
 
 export function openAIAccess(access: AccessSchema, apiPath: string): { headers: HeadersInit, url: string } {
   // API key
@@ -208,7 +227,7 @@ export function openAIAccess(access: AccessSchema, apiPath: string): { headers: 
   const oaiOrg = access.oaiOrg || process.env.OPENAI_API_ORG_ID || '';
 
   // API host
-  let oaiHost = access.oaiHost || process.env.OPENAI_API_HOST || 'https://api.openai.com';
+  let oaiHost = access.oaiHost || process.env.OPENAI_API_HOST || DEFAULT_OPENAI_HOST;
   if (!oaiHost.startsWith('http'))
     oaiHost = `https://${oaiHost}`;
   if (oaiHost.endsWith('/') && apiPath.startsWith('/'))
@@ -217,8 +236,8 @@ export function openAIAccess(access: AccessSchema, apiPath: string): { headers: 
   // Helicone key
   const heliKey = access.heliKey || process.env.HELICONE_API_KEY || '';
 
-  // warn if no key - only for OpenAI hosts
-  if (!oaiKey && oaiHost.indexOf('api.openai.com') !== -1)
+  // warn if no key - only for default (unoverridden) hosts
+  if (!oaiKey && oaiHost.indexOf(DEFAULT_OPENAI_HOST) !== -1)
     throw new Error('Missing OpenAI API Key. Add it on the UI (Models Setup) or server side (your deployment).');
 
   return {
