@@ -5,16 +5,16 @@ import { Box, Typography } from '@mui/joy';
 import { InlineError } from '~/common/components/InlineError';
 
 export function CallStatus(props: {
-  callerName: string,
+  callerName?: string,
   statusText: string,
   isMicEnabled: boolean,
   isSpeakEnabled: boolean
 }) {
   return <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
 
-    <Typography level='h3' sx={{ textAlign: 'center' }}>
+    {!!props.callerName && <Typography level='h3' sx={{ textAlign: 'center' }}>
       <b>{props.callerName}</b>
-    </Typography>
+    </Typography>}
     <Typography level='body-md' sx={{ textAlign: 'center' }}>
       {props.statusText}
     </Typography>

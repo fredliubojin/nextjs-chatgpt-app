@@ -8,6 +8,10 @@ export async function playSoundBuffer(audioBuffer: ArrayBuffer) {
   bufferSource.start();
 }
 
+export function playSoundUrl(url: string) {
+  const audio = new Audio(url);
+  audio.play().catch(error => console.error('Error playing audio:', url, error));
+}
 
 /**
  * Plays a sound from a URL, and optionally repeats it after a delay.
@@ -21,12 +25,8 @@ export function usePlaySoundUrlLoop(url: string | null, firstDelay: number = 0, 
 
     let timer2: any;
 
-    const playAudio = () => {
-      const audio = new Audio(url);
-      audio.play().catch(error => console.error('Error playing audio:', error));
-    };
-
     const playFirstTime = () => {
+      const playAudio = () => playSoundUrl(url);
       playAudio();
       timer2 = repeatMs > 0 ? setInterval(playAudio, repeatMs) : null;
     };

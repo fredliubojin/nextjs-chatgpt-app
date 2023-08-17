@@ -14,7 +14,7 @@ import { streamChat, VChatMessageIn } from '~/modules/llms/llm.client';
 import { Link } from '~/common/components/Link';
 import { SpeechResult, useSpeechRecognition } from '~/common/components/useSpeechRecognition';
 import { createDMessage, DMessage, useChatStore } from '~/common/state/store-chats';
-import { usePlaySoundUrlLoop } from '~/common/util/audioUtils';
+import { playSoundUrl, usePlaySoundUrlLoop } from '~/common/util/audioUtils';
 
 import { AvatarRing } from './components/AvatarRing';
 import { CallButton } from './components/CallButton';
@@ -34,6 +34,7 @@ export function CallUI(props: {
   const [micMuted, setMicMuted] = React.useState(false);
   const [callMessages, setCallMessages] = React.useState<DMessage[]>([]);
   const [personaTextInterim, setPersonaTextInterim] = React.useState<string | null>(null);
+  const [callElapsedTime, setCallElapsedTime] = React.useState<string>('00:00');
 
   // external state
   const { messages } = useChatStore(state => {
@@ -57,20 +58,16 @@ export function CallUI(props: {
   const { isSpeechEnabled, isRecordingAudio, startRecording, stopRecording } = useSpeechRecognition(onSpeechResultCallback, 1000);
 
   // derived state
-  const personaName = persona?.title ?? 'Unknown';
   const isRinging = stage === 'ring';
   const isConnected = stage === 'connected';
   const isDeclined = stage === 'declined';
   const isEnded = stage === 'ended';
-  const isMicEnabled = isSpeechEnabled;
-  const isSpeakEnabled = true;
-  const isEnabled = isMicEnabled && isSpeakEnabled;
 
 
   /// RINGING
 
   // play the ringtone
-  usePlaySoundUrlLoop(isRinging ? '/sounds/rising-pops.mp3' : null, 300, 2800);
+  usePlaySoundUrlLoop(isRinging ? '/sounds/chat-ringtone.mp3' : null, 300, 2800 * 2);
 
 
   /// CONNECTED
@@ -84,11 +81,30 @@ export function CallUI(props: {
     setStage('ended');
   };
 
-  // [E] begin call
+  // [E] begin call - rising edge of isConnected
   React.useEffect(() => {
-    if (isConnected)
-      setCallMessages([createDMessage('assistant', 'Hello?')]);
+    if (!isConnected) return;
+
+    const firstMessage: string = ['Hello?', 'Hey!'][Math.random() > 0.5 ? 1 : 0];
+    setCallMessages([createDMessage('assistant', firstMessage)]);
+
+    // show the call timer
+    setCallElapsedTime('00:00');
+    const start = Date.now();
+    const interval = setInterval(() => {
+      const elapsedSeconds = Math.floor((Date.now() - start) / 1000);
+      const minutes = Math.floor(elapsedSeconds / 60);
+      const seconds = elapsedSeconds % 60;
+      setCallElapsedTime(`${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`);
+    }, 1000);
+
+    return () => clearInterval(interval);
   }, [isConnected]);
+
+  // [E] call begin/end sound
+  React.useEffect(() => {
+    !isRinging && playSoundUrl(isConnected ? '/sounds/chat-begin.mp3' : '/sounds/chat-end.mp3');
+  }, [isRinging, isConnected]);
 
   // [E] continuous speech recognition
   const shouldStartRecording = isConnected && speechInterim === null && !isRecordingAudio;
@@ -97,14 +113,19 @@ export function CallUI(props: {
       startRecording();
   }, [shouldStartRecording, startRecording]);
 
-  // [E] generate a new streaming chat
+  // [E] persona streaming response - upon new user message
   React.useEffect(() => {
-    if (!isConnected || callMessages.length < 1)
+    if (!isConnected || callMessages.length < 1 || callMessages[callMessages.length - 1].role !== 'user')
       return;
-    if (callMessages[callMessages.length - 1].role === 'assistant')
-      return;
+    switch (callMessages[callMessages.length - 1].text) {
+      case 'Stop.':
+        return;
+      case 'Goodbye.':
+        handleCallStop();
+        return;
+    }
 
-    // Telephone Call 'PROMPT'
+    // 'prompt' for a "telephone call"
     // FIXME: can easily run ouf of tokens - if this gets traction, we'll fix it
     const callPrompt: VChatMessageIn[] = [
       { role: 'system', content: 'You are having a phone call. Your response style is brief and to the point, and according to your personality, defined below.' },
@@ -135,29 +156,35 @@ export function CallUI(props: {
     };
   }, [isConnected, callMessages, messages, props.llmId]);
 
+
+  // more derived state
+  const personaName = persona?.title ?? 'Unknown';
+  const isMicEnabled = isSpeechEnabled;
+  const isSpeakEnabled = true;
+  const isEnabled = isMicEnabled && isSpeakEnabled;
+
+
   return <>
 
-    <Typography level='h1' sx={{ fontSize: '3rem', textAlign: 'center' }}>
+    <Typography level='h1' sx={{ fontSize: { xs: '2.5rem', lg: '3rem' }, textAlign: 'center', mx: 2 }}>
       {isConnected ? personaName : 'Hello'}
     </Typography>
 
     <AvatarRing symbol={persona?.symbol || '?'} isRinging={isRinging} onClick={() => setAvatarClicked(avatarClicked + 1)} />
 
-    {!isConnected && <CallStatus
-      callerName={personaName}
-      statusText={isRinging ? 'is calling you...' : isDeclined ? 'call declined' : isEnded ? 'call ended' : 'on the line'}
+    <CallStatus
+      callerName={isConnected ? undefined : personaName}
+      statusText={isRinging ? 'is calling you...' : isDeclined ? 'call declined' : isEnded ? 'call ended' : callElapsedTime}
       isMicEnabled={isMicEnabled} isSpeakEnabled={isSpeakEnabled}
-    />}
+    />
 
-    {/* Two speakers bubbles */}
     {(isConnected || isEnded) && (
       <Card variant='soft' sx={{
-        minHeight: '12dvh', maxHeight: '22dvh',
+        minHeight: '14dvh', maxHeight: '22dvh',
         overflow: 'auto',
         width: '100%',
-        borderRadius: 'xl',
+        borderRadius: 'lg',
         flexDirection: 'column-reverse',
-        p: 1,
       }}>
         <Box sx={{ display: 'flex', flexDirection: 'column-reverse', gap: 1 }}>
           {/* Human is Speaking */}
