@@ -100,8 +100,9 @@ export const useSpeechRecognition = (onResultCallback: (result: SpeechResult) =>
       speechResult.interimTranscript = 'Listening...';
       speechResult.done = false;
       onResultCallback(speechResult);
-      if (instance.interimResults)
-        reloadInactivityTimeout(2 * softStopTimeout);
+      // let the system handle the first stop (as long as possible)
+      // if (instance.interimResults)
+      //   reloadInactivityTimeout(2 * softStopTimeout);
     };
 
     instance.onend = () => {
