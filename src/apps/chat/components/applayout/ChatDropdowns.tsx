@@ -1,8 +1,11 @@
 import * as React from 'react';
+import { useRouter } from 'next/router';
 import { shallow } from 'zustand/shallow';
 
-import { ListItemButton, ListItemDecorator, Typography } from '@mui/joy';
+import { ListItemButton, ListItemDecorator } from '@mui/joy';
 import BuildCircleIcon from '@mui/icons-material/BuildCircle';
+import CallIcon from '@mui/icons-material/Call';
+import PhoneForwardedIcon from '@mui/icons-material/PhoneForwarded';
 import SettingsIcon from '@mui/icons-material/Settings';
 
 import { DLLMId, DModelSourceId } from '~/modules/llms/llm.types';
@@ -10,6 +13,8 @@ import { SystemPurposeId, SystemPurposes } from '../../../../data';
 import { useModelsStore } from '~/modules/llms/store-llms';
 
 import { AppBarDropdown, DropdownItems } from '~/common/layout/AppBarDropdown';
+import { launchAppCall } from '~/common/routing';
+import { maySpeechRecognitionWork } from '~/common/components/useSpeechRecognition';
 import { useChatStore } from '~/common/state/store-chats';
 import { useUIPreferencesStore, useUIStateStore } from '~/common/state/store-ui';
 
@@ -19,13 +24,16 @@ export function ChatDropdowns(props: {
 }) {
 
   // external state
-  const { chatLLMId, setChatLLMId, llms } = useModelsStore(state => ({
+  const router = useRouter();
+  const { llms, chatLLMId, setChatLLMId } = useModelsStore(state => ({
     chatLLMId: state.chatLLMId,
     setChatLLMId: state.setChatLLMId,
     llms: state.llms,
   }), shallow);
-
-  const { zenMode } = useUIPreferencesStore(state => ({ zenMode: state.zenMode }), shallow);
+  const { experimentalLabs, zenMode } = useUIPreferencesStore(state => ({
+    experimentalLabs: state.experimentalLabs,
+    zenMode: state.zenMode,
+  }), shallow);
   const { systemPurposeId, setSystemPurposeId } = useChatStore(state => {
     const conversation = state.conversations.find(conversation => conversation.id === props.conversationId);
     return {
@@ -37,13 +45,29 @@ export function ChatDropdowns(props: {
     openLLMOptions: state.openLLMOptions, openModelsSetup: state.openModelsSetup,
   }), shallow);
 
-  const handleChatModelChange = (event: any, value: DLLMId | null) =>
+  const handleChatModelChange = (_event: any, value: DLLMId | null) =>
     value && props.conversationId && setChatLLMId(value);
 
-  const handleSystemPurposeChange = (event: any, value: SystemPurposeId | null) =>
+  const handleSystemPurposeChange = (_event: any, value: SystemPurposeId | null) =>
     value && props.conversationId && setSystemPurposeId(props.conversationId, value);
 
   const handleOpenLLMOptions = () => chatLLMId && openLLMOptions(chatLLMId);
+
+
+  // Experimental - Calling
+  const handleCallPersona = () => {
+    if (systemPurposeId && chatLLMId && props.conversationId)
+      launchAppCall(router, {
+        conversationId: props.conversationId,
+        personaId: systemPurposeId,
+        llmId: chatLLMId,
+      });
+  };
+
+  const showPersonaCall = experimentalLabs;
+
+  const enablePersonaCall = !!props.conversationId && !!systemPurposeId && !!chatLLMId && maySpeechRecognitionWork();
+
 
   // build model menu items, filtering-out hidden models, and add Source separators
   const llmItems: DropdownItems = {};
@@ -70,12 +94,14 @@ export function ChatDropdowns(props: {
 
         {chatLLMId && (
           <ListItemButton key='menu-opt' onClick={handleOpenLLMOptions}>
-            <ListItemDecorator><SettingsIcon color='success' /></ListItemDecorator><Typography>Options</Typography>
+            <ListItemDecorator><SettingsIcon color='success' /></ListItemDecorator>
+            Options
           </ListItemButton>
         )}
 
         <ListItemButton key='menu-llms' onClick={openModelsSetup}>
-          <ListItemDecorator><BuildCircleIcon color='success' /></ListItemDecorator><Typography>Models</Typography>
+          <ListItemDecorator><BuildCircleIcon color='success' /></ListItemDecorator>
+          Models
         </ListItemButton>
 
       </>}
@@ -86,6 +112,14 @@ export function ChatDropdowns(props: {
       <AppBarDropdown
         items={SystemPurposes} showSymbols={zenMode !== 'cleaner'}
         value={systemPurposeId} onChange={handleSystemPurposeChange}
+        appendOption={showPersonaCall ? <>
+
+          <ListItemButton disabled={!enablePersonaCall} key='menu-call-persona' onClick={handleCallPersona}>
+            <ListItemDecorator>{enablePersonaCall ? <PhoneForwardedIcon color='success' /> : <CallIcon color='warning' />}</ListItemDecorator>
+            Call
+          </ListItemButton>
+
+        </> : undefined}
       />
     )}
 
