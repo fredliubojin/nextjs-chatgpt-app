@@ -18,6 +18,7 @@ import { usePlaySoundUrlLoop } from '~/common/util/audioUtils';
 import { AvatarRing } from './components/AvatarRing';
 import { CallButton } from './components/CallButton';
 import { CallStatus } from './components/CallStatus';
+import { streamChat, VChatMessageIn } from '~/modules/llms/llm.client';
 
 
 export function CallUI(props: {
@@ -31,6 +32,7 @@ export function CallUI(props: {
   const [stage, setStage] = React.useState<'ring' | 'declined' | 'connected' | 'ended'>('ring');
   const [micMuted, setMicMuted] = React.useState(false);
   const [callMessages, setCallMessages] = React.useState<DMessage[]>([]);
+  const [personaTextInterim, setPersonaTextInterim] = React.useState<string | null>(null);
 
   // external state
   const { messages } = useChatStore(state => {
@@ -95,11 +97,40 @@ export function CallUI(props: {
 
   // [E] generate a new streaming chat
   React.useEffect(() => {
-    if (callMessages.length < 1)
+    if (!isConnected || callMessages.length < 1)
+      return;
+    if (callMessages[callMessages.length - 1].role === 'assistant')
       return;
 
-    console.log('aa');
-  }, [callMessages, messages]);
+    // Telephone Call 'PROMPT'
+    // FIXME: can easily run ouf of tokens - if this gets traction, we'll fix it
+    const callPrompt: VChatMessageIn[] = [
+      { role: 'system', content: 'You are having a phone call. Your response style is brief and to the point, and according to your personality, defined below.' },
+      ...messages.map(message => ({ role: message.role, content: message.text })),
+      { role: 'system', content: 'You are now on the phone call related to the chat above. Respect your personality and answer with short, friendly and accurate thoughtful lines.' },
+      ...callMessages.map(message => ({ role: message.role, content: message.text })),
+    ];
+
+    const abortController = new AbortController();
+    let finalText = '';
+    let error: any | null = null;
+    streamChat(props.llmId, callPrompt, abortController.signal, (updatedMessage: Partial<DMessage>) => {
+      const text = updatedMessage.text;
+      if (text) {
+        finalText = text;
+        setPersonaTextInterim(text);
+      }
+    }).catch(err => {
+      error = err;
+    }).finally(() => {
+      setPersonaTextInterim(null);
+      setCallMessages(messages => [...messages, createDMessage('assistant', finalText)]);
+    });
+
+    return () => {
+      abortController.abort();
+    };
+  }, [isConnected, callMessages, messages, props.llmId]);
 
   return <>
 
@@ -122,13 +153,17 @@ export function CallUI(props: {
           <Chip key={message.id}
                 color={message.role === 'assistant' ? 'primary' : 'primary'}
                 variant={message.role === 'assistant' ? 'solid' : undefined}
-                sx={{ alignSelf: message.role === 'assistant' ? 'start' : 'end' }}
+                sx={{ alignSelf: message.role === 'assistant' ? 'start' : 'end', whiteSpace: 'break-spaces' }}
           >
             {message.text}
           </Chip>,
         )}
-        {/* Message I'm speaking */}
-        {speechInterim !== null && <Chip color='neutral' variant='solid' sx={{ alignSelf: 'end' }}>
+        {/* Persona Interim */}
+        {!!personaTextInterim && <Chip color='primary' variant='soft' sx={{ alignSelf: 'start', whiteSpace: 'break-spaces' }}>
+          {personaTextInterim}
+        </Chip>}
+        {/* Human Interim */}
+        {speechInterim !== null && <Chip color='neutral' variant='solid' sx={{ alignSelf: 'end', whiteSpace: 'break-spaces' }}>
           {speechInterim?.transcript}
           <i>{speechInterim?.interimTranscript}</i>
         </Chip>}
