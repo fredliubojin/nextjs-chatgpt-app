@@ -111,6 +111,7 @@ export function CallUI(props: {
       ...callMessages.map(message => ({ role: message.role, content: message.text })),
     ];
 
+    // perform completion
     const abortController = new AbortController();
     let finalText = '';
     let error: any | null = null;
@@ -124,7 +125,7 @@ export function CallUI(props: {
       error = err;
     }).finally(() => {
       setPersonaTextInterim(null);
-      setCallMessages(messages => [...messages, createDMessage('assistant', finalText)]);
+      setCallMessages(messages => [...messages, createDMessage('assistant', finalText + error ? ` (ERROR: ${error.message || error.toString()})` : '')]);
     });
 
     return () => {
