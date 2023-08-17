@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { useRouter } from 'next/router';
 import { shallow } from 'zustand/shallow';
 
 import { Box, Card, Chip, Typography } from '@mui/joy';
@@ -11,6 +10,7 @@ import MicOffIcon from '@mui/icons-material/MicOff';
 import { DLLMId } from '~/modules/llms/llm.types';
 import { SystemPurposeId, SystemPurposes } from '../../data';
 
+import { Link } from '~/common/components/Link';
 import { SpeechResult, useSpeechRecognition } from '~/common/components/useSpeechRecognition';
 import { createDMessage, DMessage, useChatStore } from '~/common/state/store-chats';
 import { usePlaySoundUrlLoop } from '~/common/util/audioUtils';
@@ -33,7 +33,6 @@ export function CallUI(props: {
   const [callMessages, setCallMessages] = React.useState<DMessage[]>([]);
 
   // external state
-  const { replace: routerReplace } = useRouter();
   const { messages } = useChatStore(state => {
     const conversation = state.conversations.find(conversation => conversation.id === props.conversationId);
     return {
@@ -47,57 +46,60 @@ export function CallUI(props: {
   const onSpeechResultCallback = React.useCallback((result: SpeechResult) => {
     setSpeechInterim(result.done ? null : { ...result });
     if (result.done) {
-      const userSpokenMessage = result.transcript.trim();
-      if (userSpokenMessage.length >= 1)
-        setCallMessages(messages => [...messages, createDMessage('user', result.transcript.trim())]);
-      // setSpeechText();
+      const transcribed = result.transcript.trim();
+      if (transcribed.length >= 1)
+        setCallMessages(messages => [...messages, createDMessage('user', transcribed)]);
     }
   }, []);
-  const speechReco = useSpeechRecognition(onSpeechResultCallback, 1000);
+  const { isSpeechEnabled, isRecordingAudio, startRecording, stopRecording } = useSpeechRecognition(onSpeechResultCallback, 1000);
 
   // derived state
   const isRinging = stage === 'ring';
   const isConnected = stage === 'connected';
   const isDeclined = stage === 'declined';
   const isEnded = stage === 'ended';
-  const isMicEnabled = speechReco.isSpeechEnabled;
+  const isMicEnabled = isSpeechEnabled;
   const isSpeakEnabled = true;
   const isEnabled = isMicEnabled && isSpeakEnabled;
 
 
-  const onReceivedMessage = React.useCallback((message: DMessage) => {
-    setCallMessages(messages => [...messages, message]);
-  }, []);
-
-
-  const handleCallAccepted = () => {
-    setStage('connected');
-    onReceivedMessage(createDMessage('assistant', 'Hello?'));
-    // speechReco.toggleRecording();
-  };
-
-  const handleCallDeclined = () => {
-    setStage('declined');
-  };
-
-  const handleCallEnd = () => {
-    setStage('ended');
-  };
-
-  const handleToggleMute = () => setMicMuted(!micMuted);
+  /// RINGING
 
   // play the ringtone
   usePlaySoundUrlLoop(isRinging ? '/sounds/rising-pops.mp3' : null, 300, 2800);
 
-  // auto-restart speech recognition if it stops
-  React.useEffect(() => {
-    console.log('ue');
-    if (isConnected && speechInterim === null && !speechReco.isRecordingAudio) {
-      console.log('toggle', { speechInterim, isRecordingAudio: speechReco.isRecordingAudio });
-      speechReco.toggleRecording();
-    }
-  }, [isConnected, speechInterim, speechReco]);
 
+  /// CONNECTED
+
+  // const onReceivedMessage = React.useCallback((message: DMessage) => {
+  //   setCallMessages(messages => [...messages, message]);
+  // }, []);
+
+  const handleCallStop = () => {
+    stopRecording();
+    setStage('ended');
+  };
+
+  // [E] begin call
+  React.useEffect(() => {
+    if (isConnected)
+      setCallMessages([createDMessage('assistant', 'Hello?')]);
+  }, [isConnected]);
+
+  // [E] continuous speech recognition
+  const shouldStartRecording = isConnected && speechInterim === null && !isRecordingAudio;
+  React.useEffect(() => {
+    if (shouldStartRecording)
+      startRecording();
+  }, [shouldStartRecording, startRecording]);
+
+  // [E] generate a new streaming chat
+  React.useEffect(() => {
+    if (callMessages.length < 1)
+      return;
+
+    console.log('aa');
+  }, [callMessages, messages]);
 
   return <>
 
@@ -126,31 +128,27 @@ export function CallUI(props: {
           </Chip>,
         )}
         {/* Message I'm speaking */}
-        <Chip color='neutral' variant='solid' sx={{ alignSelf: 'end' }}>
+        {speechInterim !== null && <Chip color='neutral' variant='solid' sx={{ alignSelf: 'end' }}>
           {speechInterim?.transcript}
           <i>{speechInterim?.interimTranscript}</i>
-        </Chip>
-        {/* Fake End Message */}
-        {isEnded && <Chip color='danger' variant='solid' sx={{ alignSelf: 'end' }}>
-          Goodbye
         </Chip>}
       </Box>
     </Card>}
 
     {/* Call Buttons */}
     <Box sx={{ width: '100%', display: 'flex', justifyContent: 'space-evenly' }}>
-      {isRinging && <CallButton Icon={CallEndIcon} text='Decline' color='danger' onClick={handleCallDeclined} />}
-      {isRinging && isEnabled && <CallButton Icon={CallIcon} text='Accept' color='success' variant='soft' onClick={handleCallAccepted} />}
-      {isConnected && <CallButton Icon={CallEndIcon} text='Hang up' color='danger' onClick={handleCallEnd} />}
-      {isConnected && <CallButton Icon={MicOffIcon} onClick={handleToggleMute}
+      {isRinging && <CallButton Icon={CallEndIcon} text='Decline' color='danger' onClick={() => setStage('declined')} />}
+      {isRinging && isEnabled && <CallButton Icon={CallIcon} text='Accept' color='success' variant='soft' onClick={() => setStage('connected')} />}
+      {isConnected && <CallButton Icon={CallEndIcon} text='Hang up' color='danger' onClick={handleCallStop} />}
+      {isConnected && <CallButton Icon={MicOffIcon} onClick={() => setMicMuted(muted => !muted)}
                                   text={micMuted ? 'Muted' : 'Mute'} color={micMuted ? 'warning' : undefined} variant={micMuted ? 'solid' : 'outlined'} />}
-      {(isEnded || isDeclined) && <CallButton Icon={ArrowBackIcon} text='Back' variant='soft' onClick={() => routerReplace('/')} />}
-      {(isEnded || isDeclined) && <CallButton Icon={CallIcon} text='Call Again' color='success' variant='soft' onClick={handleCallAccepted} />}
+      {(isEnded || isDeclined) && <Link noLinkStyle href='/'><CallButton Icon={ArrowBackIcon} text='Back' variant='soft' /></Link>}
+      {(isEnded || isDeclined) && <CallButton Icon={CallIcon} text='Call Again' color='success' variant='soft' onClick={() => setStage('connected')} />}
     </Box>
 
     {/* DEBUG state */}
     {avatarClicked > 10 && (avatarClicked % 2 === 0) && <Card variant='outlined' sx={{ maxHeight: '25dvh', overflow: 'auto', whiteSpace: 'pre', py: 0, width: '100%' }}>
-      {JSON.stringify({ speechReco, speechInterim }, null, 2)}
+      {JSON.stringify({ isSpeechEnabled, isRecordingAudio, speechInterim }, null, 2)}
     </Card>}
 
     {/*{isEnded && <Card variant='solid' size='lg' color='primary'>*/}
