@@ -10,7 +10,7 @@ export function CallStatus(props: {
   isMicEnabled: boolean,
   isSpeakEnabled: boolean
 }) {
-  return <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 1 }}>
+  return <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
 
     <Typography level='h3' sx={{ textAlign: 'center' }}>
       <b>{props.callerName}</b>

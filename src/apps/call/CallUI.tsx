@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { shallow } from 'zustand/shallow';
 
-import { Box, Card, Chip, Typography } from '@mui/joy';
+import { Box, Card, Typography } from '@mui/joy';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CallEndIcon from '@mui/icons-material/CallEnd';
 import CallIcon from '@mui/icons-material/Call';
@@ -9,6 +9,7 @@ import MicOffIcon from '@mui/icons-material/MicOff';
 
 import { DLLMId } from '~/modules/llms/llm.types';
 import { SystemPurposeId, SystemPurposes } from '../../data';
+import { streamChat, VChatMessageIn } from '~/modules/llms/llm.client';
 
 import { Link } from '~/common/components/Link';
 import { SpeechResult, useSpeechRecognition } from '~/common/components/useSpeechRecognition';
@@ -18,7 +19,7 @@ import { usePlaySoundUrlLoop } from '~/common/util/audioUtils';
 import { AvatarRing } from './components/AvatarRing';
 import { CallButton } from './components/CallButton';
 import { CallStatus } from './components/CallStatus';
-import { streamChat, VChatMessageIn } from '~/modules/llms/llm.client';
+import { TranscriptMessage } from './components/TranscriptMessage';
 
 
 export function CallUI(props: {
@@ -56,6 +57,7 @@ export function CallUI(props: {
   const { isSpeechEnabled, isRecordingAudio, startRecording, stopRecording } = useSpeechRecognition(onSpeechResultCallback, 1000);
 
   // derived state
+  const personaName = persona?.title ?? 'Unknown';
   const isRinging = stage === 'ring';
   const isConnected = stage === 'connected';
   const isDeclined = stage === 'declined';
@@ -116,7 +118,7 @@ export function CallUI(props: {
     let finalText = '';
     let error: any | null = null;
     streamChat(props.llmId, callPrompt, abortController.signal, (updatedMessage: Partial<DMessage>) => {
-      const text = updatedMessage.text;
+      const text = updatedMessage.text?.trim();
       if (text) {
         finalText = text;
         setPersonaTextInterim(text);
@@ -136,40 +138,41 @@ export function CallUI(props: {
   return <>
 
     <Typography level='h1' sx={{ fontSize: '3rem', textAlign: 'center' }}>
-      Hello
+      {isConnected ? personaName : 'Hello'}
     </Typography>
 
     <AvatarRing symbol={persona?.symbol || '?'} isRinging={isRinging} onClick={() => setAvatarClicked(avatarClicked + 1)} />
 
-    <CallStatus
-      callerName={persona?.title || 'Unknown'}
+    {!isConnected && <CallStatus
+      callerName={personaName}
       statusText={isRinging ? 'is calling you...' : isDeclined ? 'call declined' : isEnded ? 'call ended' : 'on the line'}
       isMicEnabled={isMicEnabled} isSpeakEnabled={isSpeakEnabled}
-    />
+    />}
 
     {/* Two speakers bubbles */}
-    {(isConnected || isEnded) && <Card sx={{ minHeight: '10dvh', maxHeight: '30dvh', overflow: 'auto', width: '100%', p: 1 }}>
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-        {callMessages.slice(-2).map((message, _index) =>
-          <Chip key={message.id}
-                color={message.role === 'assistant' ? 'primary' : 'primary'}
-                variant={message.role === 'assistant' ? 'solid' : undefined}
-                sx={{ alignSelf: message.role === 'assistant' ? 'start' : 'end', whiteSpace: 'break-spaces' }}
-          >
-            {message.text}
-          </Chip>,
-        )}
-        {/* Persona Interim */}
-        {!!personaTextInterim && <Chip color='primary' variant='soft' sx={{ alignSelf: 'start', whiteSpace: 'break-spaces' }}>
-          {personaTextInterim}
-        </Chip>}
-        {/* Human Interim */}
-        {speechInterim !== null && <Chip color='neutral' variant='solid' sx={{ alignSelf: 'end', whiteSpace: 'break-spaces' }}>
-          {speechInterim?.transcript}
-          <i>{speechInterim?.interimTranscript}</i>
-        </Chip>}
-      </Box>
-    </Card>}
+    {(isConnected || isEnded) && (
+      <Card variant='soft' sx={{
+        minHeight: '12dvh', maxHeight: '22dvh',
+        overflow: 'auto',
+        width: '100%',
+        borderRadius: 'xl',
+        flexDirection: 'column-reverse',
+        p: 1,
+      }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column-reverse', gap: 1 }}>
+          {/* Human is Speaking */}
+          <TranscriptMessage text={<>{speechInterim?.transcript ? speechInterim.transcript + ' ' : ''}<i>{speechInterim?.interimTranscript}</i></>} role='user' variant='outlined' />
+
+          {/* Persona Interim */}
+          {!!personaTextInterim && <TranscriptMessage role='assistant' text={personaTextInterim} variant='soft' color='success' />}
+
+          {/* Messages (all in reverse order, for column-reverse to work) */}
+          {callMessages.slice(-6).reverse().map((message) =>
+            <TranscriptMessage key={message.id} role={message.role} text={message.text} variant={message.role === 'assistant' ? 'solid' : 'soft'} color='neutral' />,
+          )}
+        </Box>
+      </Card>
+    )}
 
     {/* Call Buttons */}
     <Box sx={{ width: '100%', display: 'flex', justifyContent: 'space-evenly' }}>
