@@ -23,9 +23,10 @@ export function maySpeechRecognitionWork() {
  */
 export const useSpeechRecognition = (onResultCallback: (result: SpeechResult) => void, softStopTimeout: number, useShortcutCtrlKey?: string) => {
   // enablers
-  const [recognition, setRecognition] = React.useState<ISpeechRecognition | null>(null);
+  const refRecognition = React.useRef<ISpeechRecognition | null>(null);
 
   // session
+  const [isSpeechEnabled, setIsSpeechEnabled] = React.useState<boolean>(false);
   const refStarted = React.useRef<boolean>(false);
   const [isRecordingAudio, setIsRecordingAudio] = React.useState<boolean>(false);
   const [isRecordingSpeech, setIsRecordingSpeech] = React.useState<boolean>(false);
@@ -39,8 +40,8 @@ export const useSpeechRecognition = (onResultCallback: (result: SpeechResult) =>
     if (typeof window === 'undefined') return;
 
     // do not re-initialize, just update the language (if we're here there's a high chance the language has changed)
-    if (recognition) {
-      recognition.lang = preferredLanguage;
+    if (refRecognition.current) {
+      refRecognition.current.lang = preferredLanguage;
       return;
     }
 
@@ -159,36 +160,38 @@ export const useSpeechRecognition = (onResultCallback: (result: SpeechResult) =>
     };
 
     // save the instance
-    setRecognition(instance);
+    refRecognition.current = instance;
+    refStarted.current = false;
+    setIsSpeechEnabled(true);
 
-  }, [onResultCallback, preferredLanguage, recognition, softStopTimeout]);
+  }, [onResultCallback, preferredLanguage, softStopTimeout]);
 
 
   // ACTIONS: start/stop recording
 
   const startRecording = React.useCallback(() => {
-    if (!recognition)
+    if (!refRecognition.current)
       return console.error('startRecording: Speech recognition is not supported or not initialized.');
     if (refStarted.current)
       return console.error('startRecording: Start recording called while already recording.');
 
     setIsSpeechError(false);
     try {
-      recognition.start();
+      refRecognition.current.start();
     } catch (error: any) {
       setIsSpeechError(true);
       console.log('Speech recognition error - clicking too quickly?', error?.message);
     }
-  }, [recognition]);
+  }, []);
 
   const stopRecording = React.useCallback(() => {
-    if (!recognition)
+    if (!refRecognition.current)
       return console.error('stopRecording: Speech recognition is not supported or not initialized.');
     if (!refStarted.current)
       return console.error('stopRecording: Stop recording called while not recording.');
 
-    recognition.stop();
-  }, [recognition]);
+    refRecognition.current.stop();
+  }, []);
 
   const toggleRecording = React.useCallback(() => {
     if (refStarted.current)
@@ -200,7 +203,7 @@ export const useSpeechRecognition = (onResultCallback: (result: SpeechResult) =>
   React.useEffect(() => {
     if (!useShortcutCtrlKey) return;
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (useShortcutCtrlKey && event.ctrlKey && event.key === useShortcutCtrlKey)
+      if (event.ctrlKey && event.key === useShortcutCtrlKey)
         toggleRecording();
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -208,7 +211,7 @@ export const useSpeechRecognition = (onResultCallback: (result: SpeechResult) =>
   }, [toggleRecording, useShortcutCtrlKey]);
 
   return {
-    isSpeechEnabled: !!recognition,
+    isSpeechEnabled,
     isSpeechError,
     isRecordingAudio,
     isRecordingSpeech,
