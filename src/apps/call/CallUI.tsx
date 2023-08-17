@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useRouter } from 'next/router';
 import { shallow } from 'zustand/shallow';
 
-import { Avatar, Box, Card, Chip, Typography } from '@mui/joy';
+import { Box, Card, Chip, Typography } from '@mui/joy';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CallEndIcon from '@mui/icons-material/CallEnd';
 import CallIcon from '@mui/icons-material/Call';
@@ -11,13 +11,13 @@ import MicOffIcon from '@mui/icons-material/MicOff';
 import { DLLMId } from '~/modules/llms/llm.types';
 import { SystemPurposeId, SystemPurposes } from '../../data';
 
-import { InlineError } from '~/common/components/InlineError';
 import { SpeechResult, useSpeechRecognition } from '~/common/components/useSpeechRecognition';
 import { createDMessage, DMessage, useChatStore } from '~/common/state/store-chats';
-import { cssScaleKeyframes } from '~/common/theme';
-
-import { CallButton } from './CallButton';
 import { usePlaySoundUrlLoop } from '~/common/util/audioUtils';
+
+import { AvatarRing } from './components/AvatarRing';
+import { CallButton } from './components/CallButton';
+import { CallStatus } from './components/CallStatus';
 
 
 export function CallUI(props: {
@@ -105,29 +105,13 @@ export function CallUI(props: {
       Hello
     </Typography>
 
-    <Avatar variant='soft' color='neutral' onClick={() => setAvatarClicked(avatarClicked + 1)} sx={{
-      '--Avatar-size': '160px',
-      '--variant-borderWidth': '4px',
-      boxShadow: 'md',
-      fontSize: '100px',
-    }}>
-      <Box sx={{
-        ...(isRinging ? { animation: `${cssScaleKeyframes} 1.4s ease-in-out infinite` } : {}),
-      }}>
-        {persona?.symbol}
-      </Box>
-    </Avatar>
+    <AvatarRing symbol={persona?.symbol || '?'} isRinging={isRinging} onClick={() => setAvatarClicked(avatarClicked + 1)} />
 
-    <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 1, mb: isRinging ? 3 : 0 }}>
-      <Typography level='h3' sx={{ textAlign: 'center' }}>
-        <b>{persona?.title}</b>
-      </Typography>
-      <Typography level='body-md' sx={{ textAlign: 'center' }}>
-        {isRinging ? 'is calling you...' : isDeclined ? 'call declined' : isEnded ? 'call ended' : 'on the line'}
-      </Typography>
-      {!isMicEnabled && <InlineError severity='danger' error='But this browser does not support speech recognition... 🤦‍♀️ - Try Chrome on Windows?' />}
-      {!isSpeakEnabled && <InlineError severity='danger' error='And text-to-speech is not configured... 🤦‍♀️ - Configure it in Settings?' />}
-    </Box>
+    <CallStatus
+      callerName={persona?.title || 'Unknown'}
+      statusText={isRinging ? 'is calling you...' : isDeclined ? 'call declined' : isEnded ? 'call ended' : 'on the line'}
+      isMicEnabled={isMicEnabled} isSpeakEnabled={isSpeakEnabled}
+    />
 
     {/* Two speakers bubbles */}
     {(isConnected || isEnded) && <Card sx={{ minHeight: '10dvh', maxHeight: '30dvh', overflow: 'auto', width: '100%', p: 1 }}>
@@ -165,7 +149,7 @@ export function CallUI(props: {
     </Box>
 
     {/* DEBUG state */}
-    {avatarClicked > 10 && <Card variant='outlined' sx={{ maxHeight: '25dvh', overflow: 'auto', whiteSpace: 'pre', py: 0, width: '100%' }}>
+    {avatarClicked > 10 && (avatarClicked % 2 === 0) && <Card variant='outlined' sx={{ maxHeight: '25dvh', overflow: 'auto', whiteSpace: 'pre', py: 0, width: '100%' }}>
       {JSON.stringify({ speechReco, speechInterim }, null, 2)}
     </Card>}
 
