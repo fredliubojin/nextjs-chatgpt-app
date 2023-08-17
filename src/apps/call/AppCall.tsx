@@ -28,7 +28,7 @@ export function AppCall() {
         display: 'flex', flexDirection: 'column',
         alignItems: 'center',
         minHeight: '80dvh', justifyContent: 'space-evenly',
-        gap: { xs: 2, md: 5 },
+        gap: { xs: 3, md: 5 },
       }}>
         {validInput
           ? <CallUI conversationId={conversationId} personaId={personaId} llmId={llmId} />

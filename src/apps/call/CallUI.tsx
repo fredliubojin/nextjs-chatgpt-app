@@ -35,6 +35,7 @@ export function CallUI(props: {
   const [callMessages, setCallMessages] = React.useState<DMessage[]>([]);
   const [personaTextInterim, setPersonaTextInterim] = React.useState<string | null>(null);
   const [callElapsedTime, setCallElapsedTime] = React.useState<string>('00:00');
+  const responseAbortController = React.useRef<AbortController | null>(null);
 
   // external state
   const { messages } = useChatStore(state => {
@@ -55,7 +56,7 @@ export function CallUI(props: {
         setCallMessages(messages => [...messages, createDMessage('user', transcribed)]);
     }
   }, []);
-  const { isSpeechEnabled, isRecordingAudio, startRecording, stopRecording } = useSpeechRecognition(onSpeechResultCallback, 1000);
+  const { isSpeechEnabled, isRecordingAudio, isRecordingSpeech, startRecording, stopRecording } = useSpeechRecognition(onSpeechResultCallback, 1000);
 
   // derived state
   const isRinging = stage === 'ring';
@@ -118,10 +119,21 @@ export function CallUI(props: {
     if (!isConnected || callMessages.length < 1 || callMessages[callMessages.length - 1].role !== 'user')
       return;
     switch (callMessages[callMessages.length - 1].text) {
+      // do not respond
       case 'Stop.':
         return;
+      // command: close the call
       case 'Goodbye.':
-        handleCallStop();
+        setStage('ended');
+        return;
+      // command: regenerate answer
+      case 'Retry.':
+      case 'Try again.':
+        setCallMessages(messages => messages.slice(0, messages.length - 2));
+        return;
+      // command: restart chat
+      case 'Restart.':
+        setCallMessages([]);
         return;
     }
 
@@ -135,26 +147,38 @@ export function CallUI(props: {
     ];
 
     // perform completion
-    const abortController = new AbortController();
+    responseAbortController.current = new AbortController();
     let finalText = '';
     let error: any | null = null;
-    streamChat(props.llmId, callPrompt, abortController.signal, (updatedMessage: Partial<DMessage>) => {
+    streamChat(props.llmId, callPrompt, responseAbortController.current.signal, (updatedMessage: Partial<DMessage>) => {
       const text = updatedMessage.text?.trim();
       if (text) {
         finalText = text;
         setPersonaTextInterim(text);
       }
-    }).catch(err => {
-      error = err;
+    }).catch((err: DOMException) => {
+      if (err?.name !== 'AbortError')
+        error = err;
     }).finally(() => {
       setPersonaTextInterim(null);
       setCallMessages(messages => [...messages, createDMessage('assistant', finalText + (error ? ` (ERROR: ${error.message || error.toString()})` : ''))]);
     });
 
     return () => {
-      abortController.abort();
+      responseAbortController.current?.abort();
+      responseAbortController.current = null;
     };
   }, [isConnected, callMessages, messages, props.llmId]);
+
+  // [E] Message interrupter
+  const abortTrigger = isConnected && isRecordingSpeech;
+  React.useEffect(() => {
+    if (abortTrigger && responseAbortController.current) {
+      responseAbortController.current.abort();
+      responseAbortController.current = null;
+    }
+    // TODO.. abort current speech
+  }, [abortTrigger]);
 
 
   // more derived state
@@ -166,7 +190,7 @@ export function CallUI(props: {
 
   return <>
 
-    <Typography level='h1' sx={{ fontSize: { xs: '2.5rem', lg: '3rem' }, textAlign: 'center', mx: 2 }}>
+    <Typography level='h1' sx={{ fontSize: { xs: '2.5rem', md: '3rem' }, textAlign: 'center', mx: 2 }}>
       {isConnected ? personaName : 'Hello'}
     </Typography>
 
@@ -178,20 +202,24 @@ export function CallUI(props: {
       isMicEnabled={isMicEnabled} isSpeakEnabled={isSpeakEnabled}
     />
 
+    {/* Messages */}
     {(isConnected || isEnded) && (
       <Card variant='soft' sx={{
-        minHeight: '14dvh', maxHeight: '22dvh',
+        minHeight: '15dvh', maxHeight: '24dvh',
         overflow: 'auto',
         width: '100%',
         borderRadius: 'lg',
         flexDirection: 'column-reverse',
       }}>
         <Box sx={{ display: 'flex', flexDirection: 'column-reverse', gap: 1 }}>
-          {/* Human is Speaking */}
-          <TranscriptMessage text={<>{speechInterim?.transcript ? speechInterim.transcript + ' ' : ''}<i>{speechInterim?.interimTranscript}</i></>} role='user' variant='outlined' />
+          {/* Listening... */}
+          <TranscriptMessage
+            text={<>{speechInterim?.transcript ? speechInterim.transcript + ' ' : ''}<i>{speechInterim?.interimTranscript}</i></>}
+            role='user' variant={isRecordingSpeech ? 'solid' : 'outlined'}
+          />
 
-          {/* Persona Interim */}
-          {!!personaTextInterim && <TranscriptMessage role='assistant' text={personaTextInterim} variant='soft' color='success' />}
+          {/* Persona partial */}
+          {!!personaTextInterim && <TranscriptMessage role='assistant' text={personaTextInterim} variant='solid' color='neutral' />}
 
           {/* Messages (all in reverse order, for column-reverse to work) */}
           {callMessages.slice(-6).reverse().map((message) =>

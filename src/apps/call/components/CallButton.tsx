@@ -10,14 +10,18 @@ export function CallButton(props: {
   color?: ColorPaletteProp,
   onClick?: () => void
 }) {
-  return <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }} onClick={() => !props.disabled && props.onClick?.()}>
+  return <Box onClick={() => !props.disabled && props.onClick?.()}
+              sx={{
+                display: 'flex', flexDirection: 'column', alignItems: 'center',
+                gap: { xs: 1, md: 2 },
+              }}>
 
     <IconButton
       disabled={props.disabled} variant={props.variant || 'solid'} color={props.color}
       sx={{
-        '--IconButton-size': '5rem',
+        '--IconButton-size': { xs: '4.2rem', md: '5rem' },
         borderRadius: '50%',
-        boxShadow: 'md',
+        // boxShadow: 'lg',
       }}>
       <props.Icon />
     </IconButton>

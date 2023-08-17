@@ -20,10 +20,10 @@ export function AvatarRing(props: { symbol: string, isRinging: boolean, onClick:
       variant='soft' color='neutral'
       onClick={props.onClick}
       sx={{
-        '--Avatar-size': '160px',
+        '--Avatar-size': { xs: '160px', md: '200px' },
         '--variant-borderWidth': '4px',
         boxShadow: 'md',
-        fontSize: '100px',
+        fontSize: { xs: '100px', md: '120px' },
       }}
     >
       <Box
