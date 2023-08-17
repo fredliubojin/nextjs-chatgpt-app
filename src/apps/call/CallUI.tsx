@@ -125,7 +125,7 @@ export function CallUI(props: {
       error = err;
     }).finally(() => {
       setPersonaTextInterim(null);
-      setCallMessages(messages => [...messages, createDMessage('assistant', finalText + error ? ` (ERROR: ${error.message || error.toString()})` : '')]);
+      setCallMessages(messages => [...messages, createDMessage('assistant', finalText + (error ? ` (ERROR: ${error.message || error.toString()})` : ''))]);
     });
 
     return () => {
