@@ -1,11 +1,14 @@
 import * as React from 'react';
 import { shallow } from 'zustand/shallow';
 
-import { Box, Card, Typography } from '@mui/joy';
+import { Box, Card, ListItemDecorator, MenuItem, Switch, Typography } from '@mui/joy';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CallEndIcon from '@mui/icons-material/CallEnd';
 import CallIcon from '@mui/icons-material/Call';
+import MicIcon from '@mui/icons-material/Mic';
+import MicNoneIcon from '@mui/icons-material/MicNone';
 import MicOffIcon from '@mui/icons-material/MicOff';
+
 import { SystemPurposeId, SystemPurposes } from '../../data';
 import { EXPERIMENTAL_speakTextStream } from '~/modules/elevenlabs/elevenlabs.client';
 import { streamChat, VChatMessageIn } from '~/modules/llms/llm.client';
@@ -21,6 +24,26 @@ import { CallStatus } from './components/CallStatus';
 import { TranscriptMessage } from './components/TranscriptMessage';
 import { conversationTitle } from '../chat/components/applayout/ConversationItem';
 import { useChatLLMDropdown } from '../chat/components/applayout/useLLMDropdown';
+import { useLayoutPluggable } from '~/common/layout/store-applayout';
+
+
+function CallMenuItems(props: {
+  pushToTalk: boolean,
+  setPushToTalk: (pushToTalk: boolean) => void,
+}) {
+
+  const handlePushToTalkToggle = () => props.setPushToTalk(!props.pushToTalk);
+
+  return <>
+
+    <MenuItem onClick={handlePushToTalkToggle}>
+      <ListItemDecorator>{props.pushToTalk ? <MicNoneIcon /> : <MicIcon />}</ListItemDecorator>
+      Push to talk
+      <Switch checked={props.pushToTalk} onChange={handlePushToTalkToggle} sx={{ ml: 'auto' }} />
+    </MenuItem>
+
+  </>;
+}
 
 
 export function CallUI(props: {
@@ -29,6 +52,7 @@ export function CallUI(props: {
 }) {
 
   // state
+  const [pushToTalk, setPushToTalk] = React.useState(true);
   const [avatarClicked, setAvatarClicked] = React.useState<number>(0);
   const [stage, setStage] = React.useState<'ring' | 'declined' | 'connected' | 'ended'>('ring');
   const [micMuted, setMicMuted] = React.useState(false);
@@ -58,7 +82,7 @@ export function CallUI(props: {
         setCallMessages(messages => [...messages, createDMessage('user', transcribed)]);
     }
   }, []);
-  const { isSpeechEnabled, isRecordingAudio, isRecordingSpeech, startRecording, stopRecording } = useSpeechRecognition(onSpeechResultCallback, 1000);
+  const { isSpeechEnabled, isRecording, isRecordingAudio, isRecordingSpeech, startRecording, stopRecording, toggleRecording } = useSpeechRecognition(onSpeechResultCallback, 1000);
 
   // derived state
   const isRinging = stage === 'ring';
@@ -67,24 +91,25 @@ export function CallUI(props: {
   const isEnded = stage === 'ended';
 
 
-  /// RINGING
+  /// Sounds
 
-  // play the ringtone
+  // pickup / hangup
+  React.useEffect(() => {
+    !isRinging && playSoundUrl(isConnected ? '/sounds/chat-begin.mp3' : '/sounds/chat-end.mp3');
+  }, [isRinging, isConnected]);
+
+  // ringtone
   usePlaySoundUrl(isRinging ? '/sounds/chat-ringtone.mp3' : null, 300, 2800 * 2);
 
 
   /// CONNECTED
-
-  // const onReceivedMessage = React.useCallback((message: DMessage) => {
-  //   setCallMessages(messages => [...messages, message]);
-  // }, []);
 
   const handleCallStop = () => {
     stopRecording();
     setStage('ended');
   };
 
-  // [E] begin call - rising edge of isConnected
+  // [E] pickup -> seed message and call timer
   React.useEffect(() => {
     if (!isConnected) return;
 
@@ -103,18 +128,6 @@ export function CallUI(props: {
 
     return () => clearInterval(interval);
   }, [isConnected]);
-
-  // [E] call begin/end sounds
-  React.useEffect(() => {
-    !isRinging && playSoundUrl(isConnected ? '/sounds/chat-begin.mp3' : '/sounds/chat-end.mp3');
-  }, [isRinging, isConnected]);
-
-  // [E] continuous speech recognition (reload)
-  const shouldStartRecording = isConnected && speechInterim === null && !isRecordingAudio;
-  React.useEffect(() => {
-    if (shouldStartRecording)
-      startRecording();
-  }, [shouldStartRecording, startRecording]);
 
   // [E] persona streaming response - upon new user message
   React.useEffect(() => {
@@ -188,6 +201,14 @@ export function CallUI(props: {
   }, [abortTrigger]);
 
 
+  // [E] continuous speech recognition (reload)
+  const shouldStartRecording = isConnected && !pushToTalk && speechInterim === null && !isRecordingAudio;
+  React.useEffect(() => {
+    if (shouldStartRecording)
+      startRecording();
+  }, [shouldStartRecording, startRecording]);
+
+
   // more derived state
   const personaName = persona?.title ?? 'Unknown';
   const isMicEnabled = isSpeechEnabled;
@@ -195,14 +216,20 @@ export function CallUI(props: {
   const isEnabled = isMicEnabled && isSpeakEnabled;
 
 
+  // pluggable UI
+
+  const menuItems = React.useMemo(() =>
+      <CallMenuItems pushToTalk={pushToTalk} setPushToTalk={setPushToTalk} />
+    , [pushToTalk],
+  );
+
+  useLayoutPluggable(chatLLMDropdown, null, menuItems);
+
   return <>
 
-    <Box sx={{display:'flex', flexDirection:'column', alignItems:'center'}}>
-      <Typography level='h1' sx={{ fontSize: { xs: '2.5rem', md: '3rem' }, textAlign: 'center', mx: 2 }}>
-        {isConnected ? personaName : 'Hello'}
-      </Typography>
-      {isConnected && chatLLMDropdown}
-    </Box>
+    <Typography level='h1' sx={{ fontSize: { xs: '2.5rem', md: '3rem' }, textAlign: 'center', mx: 2 }}>
+      {isConnected ? personaName : 'Hello'}
+    </Typography>
 
     <AvatarRing symbol={persona?.symbol || '?'} isRinging={isRinging} onClick={() => setAvatarClicked(avatarClicked + 1)} />
 
@@ -224,10 +251,10 @@ export function CallUI(props: {
       }}>
         <Box sx={{ display: 'flex', flexDirection: 'column-reverse', gap: 1 }}>
           {/* Listening... */}
-          <TranscriptMessage
+          {isRecording && <TranscriptMessage
             text={<>{speechInterim?.transcript ? speechInterim.transcript + ' ' : ''}<i>{speechInterim?.interimTranscript}</i></>}
             role='user' variant={isRecordingSpeech ? 'solid' : 'outlined'}
-          />
+          />}
 
           {/* Persona partial */}
           {!!personaTextInterim && <TranscriptMessage role='assistant' text={personaTextInterim} variant='solid' color='neutral' />}
@@ -242,11 +269,22 @@ export function CallUI(props: {
 
     {/* Call Buttons */}
     <Box sx={{ width: '100%', display: 'flex', justifyContent: 'space-evenly' }}>
+      {/* ringing */}
       {isRinging && <CallButton Icon={CallEndIcon} text='Decline' color='danger' onClick={() => setStage('declined')} />}
       {isRinging && isEnabled && <CallButton Icon={CallIcon} text='Accept' color='success' variant='soft' onClick={() => setStage('connected')} />}
+
+      {/* connected */}
       {isConnected && <CallButton Icon={CallEndIcon} text='Hang up' color='danger' onClick={handleCallStop} />}
-      {isConnected && <CallButton Icon={MicOffIcon} onClick={() => setMicMuted(muted => !muted)}
-                                  text={micMuted ? 'Muted' : 'Mute'} color={micMuted ? 'warning' : undefined} variant={micMuted ? 'solid' : 'outlined'} />}
+      {isConnected && (pushToTalk
+          ? <CallButton Icon={MicIcon} onClick={toggleRecording}
+                        text={isRecordingSpeech ? 'Listening...' : isRecording ? 'Listening' : 'Talk'}
+                        variant={isRecordingSpeech ? 'solid' : isRecording ? 'soft' : 'outlined'} />
+          : <CallButton Icon={MicOffIcon} onClick={() => setMicMuted(muted => !muted)}
+                        text={micMuted ? 'Muted' : 'Mute'}
+                        color={micMuted ? 'warning' : undefined} variant={micMuted ? 'solid' : 'outlined'} />
+      )}
+
+      {/* ended */}
       {(isEnded || isDeclined) && <Link noLinkStyle href='/'><CallButton Icon={ArrowBackIcon} text='Back' variant='soft' /></Link>}
       {(isEnded || isDeclined) && <CallButton Icon={CallIcon} text='Call Again' color='success' variant='soft' onClick={() => setStage('connected')} />}
     </Box>
