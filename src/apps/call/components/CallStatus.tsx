@@ -8,13 +8,15 @@ export function CallStatus(props: {
   callerName?: string,
   statusText: string,
   isMicEnabled: boolean,
-  isSpeakEnabled: boolean
+  isSpeakEnabled: boolean,
+  llmComponent?: React.JSX.Element,
 }) {
-  return <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
+  return <Box sx={{ display: 'flex', flexDirection: 'column' }}>
 
     {!!props.callerName && <Typography level='h3' sx={{ textAlign: 'center' }}>
       <b>{props.callerName}</b>
     </Typography>}
+    {props.llmComponent}
     <Typography level='body-md' sx={{ textAlign: 'center' }}>
       {props.statusText}
     </Typography>

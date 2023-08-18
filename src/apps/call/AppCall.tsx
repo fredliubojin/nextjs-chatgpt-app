@@ -14,8 +14,8 @@ export function AppCall() {
   const { query } = useRouter();
 
   // derived state
-  const { conversationId, personaId, llmId } = query as any as AppCallQueryParams;
-  const validInput = !!conversationId && !!personaId && !!llmId;
+  const { conversationId, personaId } = query as any as AppCallQueryParams;
+  const validInput = !!conversationId && !!personaId;
 
   return (
     <Sheet variant='solid' color='neutral' invertedColors sx={{
@@ -31,7 +31,7 @@ export function AppCall() {
         gap: { xs: 3, md: 5 },
       }}>
         {validInput
-          ? <CallUI conversationId={conversationId} personaId={personaId} llmId={llmId} />
+          ? <CallUI conversationId={conversationId} personaId={personaId} />
           : <InlineError error={`Something went wrong. ${JSON.stringify(query)}`} />
         }
       </Container>

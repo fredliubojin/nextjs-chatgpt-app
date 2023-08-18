@@ -6,8 +6,6 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CallEndIcon from '@mui/icons-material/CallEnd';
 import CallIcon from '@mui/icons-material/Call';
 import MicOffIcon from '@mui/icons-material/MicOff';
-
-import { DLLMId } from '~/modules/llms/llm.types';
 import { SystemPurposeId, SystemPurposes } from '../../data';
 import { EXPERIMENTAL_speakTextStream } from '~/modules/elevenlabs/elevenlabs.client';
 import { streamChat, VChatMessageIn } from '~/modules/llms/llm.client';
@@ -21,12 +19,12 @@ import { AvatarRing } from './components/AvatarRing';
 import { CallButton } from './components/CallButton';
 import { CallStatus } from './components/CallStatus';
 import { TranscriptMessage } from './components/TranscriptMessage';
+import { useChatLLMDropdown } from '../chat/components/applayout/useLLMDropdown';
 
 
 export function CallUI(props: {
   conversationId: string,
   personaId: string,
-  llmId: DLLMId
 }) {
 
   // state
@@ -39,6 +37,7 @@ export function CallUI(props: {
   const responseAbortController = React.useRef<AbortController | null>(null);
 
   // external state
+  const { chatLLMId, chatLLMDropdown } = useChatLLMDropdown();
   const { messages } = useChatStore(state => {
     const conversation = state.conversations.find(conversation => conversation.id === props.conversationId);
     return {
@@ -117,6 +116,7 @@ export function CallUI(props: {
 
   // [E] persona streaming response - upon new user message
   React.useEffect(() => {
+    // only act when we have a new user message
     if (!isConnected || callMessages.length < 1 || callMessages[callMessages.length - 1].role !== 'user')
       return;
     switch (callMessages[callMessages.length - 1].text) {
@@ -138,6 +138,9 @@ export function CallUI(props: {
         return;
     }
 
+    // bail if no llm selected
+    if (!chatLLMId) return;
+
     // 'prompt' for a "telephone call"
     // FIXME: can easily run ouf of tokens - if this gets traction, we'll fix it
     const callPrompt: VChatMessageIn[] = [
@@ -151,7 +154,7 @@ export function CallUI(props: {
     responseAbortController.current = new AbortController();
     let finalText = '';
     let error: any | null = null;
-    streamChat(props.llmId, callPrompt, responseAbortController.current.signal, (updatedMessage: Partial<DMessage>) => {
+    streamChat(chatLLMId, callPrompt, responseAbortController.current.signal, (updatedMessage: Partial<DMessage>) => {
       const text = updatedMessage.text?.trim();
       if (text) {
         finalText = text;
@@ -170,7 +173,7 @@ export function CallUI(props: {
       responseAbortController.current?.abort();
       responseAbortController.current = null;
     };
-  }, [isConnected, callMessages, messages, props.llmId]);
+  }, [isConnected, callMessages, chatLLMId, messages]);
 
   // [E] Message interrupter
   const abortTrigger = isConnected && isRecordingSpeech;
@@ -192,9 +195,12 @@ export function CallUI(props: {
 
   return <>
 
-    <Typography level='h1' sx={{ fontSize: { xs: '2.5rem', md: '3rem' }, textAlign: 'center', mx: 2 }}>
-      {isConnected ? personaName : 'Hello'}
-    </Typography>
+    <Box>
+      <Typography level='h1' sx={{ fontSize: { xs: '2.5rem', md: '3rem' }, textAlign: 'center', mx: 2 }}>
+        {isConnected ? personaName : 'Hello'}
+      </Typography>
+      {chatLLMDropdown}
+    </Box>
 
     <AvatarRing symbol={persona?.symbol || '?'} isRinging={isRinging} onClick={() => setAvatarClicked(avatarClicked + 1)} />
 
