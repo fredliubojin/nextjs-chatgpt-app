@@ -9,12 +9,13 @@ import MicOffIcon from '@mui/icons-material/MicOff';
 
 import { DLLMId } from '~/modules/llms/llm.types';
 import { SystemPurposeId, SystemPurposes } from '../../data';
+import { EXPERIMENTAL_speakTextStream } from '~/modules/elevenlabs/elevenlabs.client';
 import { streamChat, VChatMessageIn } from '~/modules/llms/llm.client';
 
 import { Link } from '~/common/components/Link';
 import { SpeechResult, useSpeechRecognition } from '~/common/components/useSpeechRecognition';
 import { createDMessage, DMessage, useChatStore } from '~/common/state/store-chats';
-import { playSoundUrl, usePlaySoundUrlLoop } from '~/common/util/audioUtils';
+import { playSoundUrl, usePlaySoundUrl } from '~/common/util/audioUtils';
 
 import { AvatarRing } from './components/AvatarRing';
 import { CallButton } from './components/CallButton';
@@ -68,7 +69,7 @@ export function CallUI(props: {
   /// RINGING
 
   // play the ringtone
-  usePlaySoundUrlLoop(isRinging ? '/sounds/chat-ringtone.mp3' : null, 300, 2800 * 2);
+  usePlaySoundUrl(isRinging ? '/sounds/chat-ringtone.mp3' : null, 300, 2800 * 2);
 
 
   /// CONNECTED
@@ -102,12 +103,12 @@ export function CallUI(props: {
     return () => clearInterval(interval);
   }, [isConnected]);
 
-  // [E] call begin/end sound
+  // [E] call begin/end sounds
   React.useEffect(() => {
     !isRinging && playSoundUrl(isConnected ? '/sounds/chat-begin.mp3' : '/sounds/chat-end.mp3');
   }, [isRinging, isConnected]);
 
-  // [E] continuous speech recognition
+  // [E] continuous speech recognition (reload)
   const shouldStartRecording = isConnected && speechInterim === null && !isRecordingAudio;
   React.useEffect(() => {
     if (shouldStartRecording)
@@ -162,6 +163,7 @@ export function CallUI(props: {
     }).finally(() => {
       setPersonaTextInterim(null);
       setCallMessages(messages => [...messages, createDMessage('assistant', finalText + (error ? ` (ERROR: ${error.message || error.toString()})` : ''))]);
+      EXPERIMENTAL_speakTextStream(finalText).then();
     });
 
     return () => {
