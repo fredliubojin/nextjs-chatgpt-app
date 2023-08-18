@@ -201,14 +201,14 @@ export function CallUI(props: {
       <Typography level='h1' sx={{ fontSize: { xs: '2.5rem', md: '3rem' }, textAlign: 'center', mx: 2 }}>
         {isConnected ? personaName : 'Hello'}
       </Typography>
-      {chatLLMDropdown}
+      {isConnected && chatLLMDropdown}
     </Box>
 
     <AvatarRing symbol={persona?.symbol || '?'} isRinging={isRinging} onClick={() => setAvatarClicked(avatarClicked + 1)} />
 
     <CallStatus
       callerName={isConnected ? undefined : personaName}
-      statusText={isRinging ? 'is calling you...' : isDeclined ? 'call declined' : isEnded ? 'call ended' : callElapsedTime}
+      statusText={isRinging ? 'is calling you,' : isDeclined ? 'call declined' : isEnded ? 'call ended' : callElapsedTime}
       regardingText={chatTitle}
       isMicEnabled={isMicEnabled} isSpeakEnabled={isSpeakEnabled}
     />

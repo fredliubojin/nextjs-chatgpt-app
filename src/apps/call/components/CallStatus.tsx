@@ -21,8 +21,8 @@ export function CallStatus(props: {
     <Typography level='body-md' sx={{ textAlign: 'center' }}>
       {props.statusText}
     </Typography>
-    {!!props.regardingText && <Typography level='body-md' sx={{ textAlign: 'center', mt: 1 }}>
-      Re: {props.regardingText}
+    {!!props.regardingText && <Typography level='body-md' sx={{ textAlign: 'center', mt: 0 }}>
+      re: {props.regardingText}
     </Typography>}
 
     {!props.isMicEnabled && <InlineError
