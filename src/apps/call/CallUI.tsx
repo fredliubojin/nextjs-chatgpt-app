@@ -277,11 +277,12 @@ export function CallUI(props: {
       {isConnected && <CallButton Icon={CallEndIcon} text='Hang up' color='danger' onClick={handleCallStop} />}
       {isConnected && (pushToTalk
           ? <CallButton Icon={MicIcon} onClick={toggleRecording}
-                        text={isRecordingSpeech ? 'Listening...' : isRecording ? 'Listening' : 'Talk'}
+                        text={isRecordingSpeech ? 'Listening...' : isRecording ? 'Listening' : 'Push To Talk'}
                         variant={isRecordingSpeech ? 'solid' : isRecording ? 'soft' : 'outlined'} />
-          : <CallButton Icon={MicOffIcon} onClick={() => setMicMuted(muted => !muted)}
-                        text={micMuted ? 'Muted' : 'Mute'}
-                        color={micMuted ? 'warning' : undefined} variant={micMuted ? 'solid' : 'outlined'} />
+          : null
+          // <CallButton disabled={true} Icon={MicOffIcon} onClick={() => setMicMuted(muted => !muted)}
+          //               text={micMuted ? 'Muted' : 'Mute'}
+          //               color={micMuted ? 'warning' : undefined} variant={micMuted ? 'solid' : 'outlined'} />
       )}
 
       {/* ended */}

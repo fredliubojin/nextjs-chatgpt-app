@@ -105,11 +105,16 @@ export class LiveAudioPlayer {
           const remainingBuffer = bufferedEnd - currentTime;
 
           if (remainingBuffer > this.bufferSizeLimit) {
-            // Remove old data from the buffer
-            sourceBuffer.remove(0, currentTime - 1);
-            await new Promise((resolve) => {
-              sourceBuffer.addEventListener('updateend', () => resolve(null), { once: true });
-            });
+            // E: just made this a bit more resilient, but not much
+            try {
+              // Remove old data from the buffer
+              sourceBuffer.remove(0, currentTime - 1);
+              await new Promise((resolve) => {
+                sourceBuffer.addEventListener('updateend', () => resolve(null), { once: true });
+              });
+            } catch (e) {
+              console.warn('Error removing old data from the buffer:', e);
+            }
           }
         }
 
