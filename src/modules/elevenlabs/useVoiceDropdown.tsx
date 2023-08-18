@@ -7,6 +7,8 @@ import RecordVoiceOverIcon from '@mui/icons-material/RecordVoiceOver';
 
 import { apiQuery } from '~/modules/trpc/trpc.client';
 
+import { playSoundUrl } from '~/common/util/audioUtils';
+
 import { VoiceSchema } from './elevenlabs.router';
 import { isElevenLabsEnabled } from './elevenlabs.client';
 import { useElevenlabsStore } from './store-elevenlabs';
@@ -47,7 +49,7 @@ function VoicesDropdown(props: {
 }
 
 
-export function useVoiceDropdown() {
+export function useVoiceDropdown(autoSpeak: boolean) {
 
   // external state
   const { apiKey, voiceId } = useElevenlabsStore(state => ({
@@ -66,6 +68,13 @@ export function useVoiceDropdown() {
 
   // global voice
   const voice: VoiceSchema | undefined = data?.voices.find(voice => voice.id === voiceId);
+
+  // [E] autoSpeak
+  const previewUrl = (autoSpeak && voice?.previewUrl) || null;
+  React.useEffect(() => {
+    if (previewUrl)
+      playSoundUrl(previewUrl);
+  }, [previewUrl]);
 
   const voicesDropdown = React.useMemo(() =>
       <VoicesDropdown

@@ -33,7 +33,7 @@ function CallMenuItems(props: {
 }) {
 
   // external state
-  const { voicesDropdown } = useVoiceDropdown();
+  const { voicesDropdown } = useVoiceDropdown(false);
 
   const handlePushToTalkToggle = () => props.setPushToTalk(!props.pushToTalk);
 

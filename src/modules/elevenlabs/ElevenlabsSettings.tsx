@@ -22,7 +22,7 @@ export function ElevenlabsSettings() {
   const requiresKey = requireUserKeyElevenLabs;
   const isValidKey = isElevenLabsEnabled(apiKey);
 
-  const { hasVoices, voicesDropdown } = useVoiceDropdown();
+  const { hasVoices, voicesDropdown } = useVoiceDropdown(true);
 
 
   const handleAutoSpeakChange = (e: React.ChangeEvent<HTMLInputElement>) => setAutoSpeak((e.target.value || 'off') as 'off' | 'firstLine');
