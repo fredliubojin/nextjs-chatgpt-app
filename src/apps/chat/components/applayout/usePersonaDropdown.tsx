@@ -38,9 +38,9 @@ function AppBarPersonaDropdown(props: {
       value={props.systemPurposeId} onChange={handleSystemPurposeChange}
       appendOption={showPersonaCall ? <>
 
-        <ListItemButton disabled={!enablePersonaCall} key='menu-call-persona' onClick={props.onCallPersona}>
+        <ListItemButton disabled={!enablePersonaCall} key='menu-call-persona' onClick={props.onCallPersona} sx={{ minWidth: 160 }}>
           <ListItemDecorator>{enablePersonaCall ? <PhoneForwardedIcon color='success' /> : <CallIcon color='warning' />}</ListItemDecorator>
-          Call
+          Call {props.systemPurposeId ? SystemPurposes[props.systemPurposeId]?.symbol : ''}
         </ListItemButton>
 
       </> : undefined}
