@@ -32,7 +32,7 @@ export async function speakText(text: string) {
   }
 }
 
-let liveAudioPlayer: LiveAudioPlayer | undefined = undefined;
+// let liveAudioPlayer: LiveAudioPlayer | undefined = undefined;
 
 export async function EXPERIMENTAL_speakTextStream(text: string) {
   if (!(text?.trim())) return;
@@ -45,8 +45,8 @@ export async function EXPERIMENTAL_speakTextStream(text: string) {
 
   const edgeResponse = await fetchApiElevenlabsSpeech(text, elevenLabsApiKey, elevenLabsVoiceId, nonEnglish, true);
 
-  if (!liveAudioPlayer)
-    liveAudioPlayer = new LiveAudioPlayer();
+  // if (!liveAudioPlayer)
+  const liveAudioPlayer = new LiveAudioPlayer();
   liveAudioPlayer.EXPERIMENTAL_playStream(edgeResponse).then();
 }
 
