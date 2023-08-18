@@ -7,6 +7,7 @@ import { InlineError } from '~/common/components/InlineError';
 export function CallStatus(props: {
   callerName?: string,
   statusText: string,
+  regardingText?: string,
   isMicEnabled: boolean,
   isSpeakEnabled: boolean,
   llmComponent?: React.JSX.Element,
@@ -20,6 +21,9 @@ export function CallStatus(props: {
     <Typography level='body-md' sx={{ textAlign: 'center' }}>
       {props.statusText}
     </Typography>
+    {!!props.regardingText && <Typography level='body-md' sx={{ textAlign: 'center', mt: 1 }}>
+      Re: {props.regardingText}
+    </Typography>}
 
     {!props.isMicEnabled && <InlineError
       severity='danger' error='But this browser does not support speech recognition... 🤦‍♀️ - Try Chrome on Windows?' />}

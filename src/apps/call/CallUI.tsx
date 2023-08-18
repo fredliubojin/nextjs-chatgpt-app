@@ -19,6 +19,7 @@ import { AvatarRing } from './components/AvatarRing';
 import { CallButton } from './components/CallButton';
 import { CallStatus } from './components/CallStatus';
 import { TranscriptMessage } from './components/TranscriptMessage';
+import { conversationTitle } from '../chat/components/applayout/ConversationItem';
 import { useChatLLMDropdown } from '../chat/components/applayout/useLLMDropdown';
 
 
@@ -38,9 +39,10 @@ export function CallUI(props: {
 
   // external state
   const { chatLLMId, chatLLMDropdown } = useChatLLMDropdown();
-  const { messages } = useChatStore(state => {
+  const { chatTitle, messages } = useChatStore(state => {
     const conversation = state.conversations.find(conversation => conversation.id === props.conversationId);
     return {
+      chatTitle: conversation ? conversationTitle(conversation) : 'no conversation',
       messages: conversation ? conversation.messages : [],
     };
   }, shallow);
@@ -195,7 +197,7 @@ export function CallUI(props: {
 
   return <>
 
-    <Box>
+    <Box sx={{display:'flex', flexDirection:'column', alignItems:'center'}}>
       <Typography level='h1' sx={{ fontSize: { xs: '2.5rem', md: '3rem' }, textAlign: 'center', mx: 2 }}>
         {isConnected ? personaName : 'Hello'}
       </Typography>
@@ -207,6 +209,7 @@ export function CallUI(props: {
     <CallStatus
       callerName={isConnected ? undefined : personaName}
       statusText={isRinging ? 'is calling you...' : isDeclined ? 'call declined' : isEnded ? 'call ended' : callElapsedTime}
+      regardingText={chatTitle}
       isMicEnabled={isMicEnabled} isSpeakEnabled={isSpeakEnabled}
     />
 
