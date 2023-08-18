@@ -7,11 +7,11 @@ import CallEndIcon from '@mui/icons-material/CallEnd';
 import CallIcon from '@mui/icons-material/Call';
 import MicIcon from '@mui/icons-material/Mic';
 import MicNoneIcon from '@mui/icons-material/MicNone';
-import MicOffIcon from '@mui/icons-material/MicOff';
 
-import { SystemPurposeId, SystemPurposes } from '../../data';
 import { EXPERIMENTAL_speakTextStream } from '~/modules/elevenlabs/elevenlabs.client';
+import { SystemPurposeId, SystemPurposes } from '../../data';
 import { streamChat, VChatMessageIn } from '~/modules/llms/llm.client';
+import { useVoiceDropdown } from '~/modules/elevenlabs/useVoiceDropdown';
 
 import { Link } from '~/common/components/Link';
 import { SpeechResult, useSpeechRecognition } from '~/common/components/useSpeechRecognition';
@@ -32,6 +32,9 @@ function CallMenuItems(props: {
   setPushToTalk: (pushToTalk: boolean) => void,
 }) {
 
+  // external state
+  const { voicesDropdown } = useVoiceDropdown();
+
   const handlePushToTalkToggle = () => props.setPushToTalk(!props.pushToTalk);
 
   return <>
@@ -40,6 +43,10 @@ function CallMenuItems(props: {
       <ListItemDecorator>{props.pushToTalk ? <MicNoneIcon /> : <MicIcon />}</ListItemDecorator>
       Push to talk
       <Switch checked={props.pushToTalk} onChange={handlePushToTalkToggle} sx={{ ml: 'auto' }} />
+    </MenuItem>
+
+    <MenuItem>
+      {voicesDropdown}
     </MenuItem>
 
   </>;
@@ -55,7 +62,7 @@ export function CallUI(props: {
   const [pushToTalk, setPushToTalk] = React.useState(true);
   const [avatarClicked, setAvatarClicked] = React.useState<number>(0);
   const [stage, setStage] = React.useState<'ring' | 'declined' | 'connected' | 'ended'>('ring');
-  const [micMuted, setMicMuted] = React.useState(false);
+  // const [micMuted, setMicMuted] = React.useState(false);
   const [callMessages, setCallMessages] = React.useState<DMessage[]>([]);
   const [personaTextInterim, setPersonaTextInterim] = React.useState<string | null>(null);
   const [callElapsedTime, setCallElapsedTime] = React.useState<string>('00:00');
@@ -280,9 +287,9 @@ export function CallUI(props: {
                         text={isRecordingSpeech ? 'Listening...' : isRecording ? 'Listening' : 'Push To Talk'}
                         variant={isRecordingSpeech ? 'solid' : isRecording ? 'soft' : 'outlined'} />
           : null
-          // <CallButton disabled={true} Icon={MicOffIcon} onClick={() => setMicMuted(muted => !muted)}
-          //               text={micMuted ? 'Muted' : 'Mute'}
-          //               color={micMuted ? 'warning' : undefined} variant={micMuted ? 'solid' : 'outlined'} />
+        // <CallButton disabled={true} Icon={MicOffIcon} onClick={() => setMicMuted(muted => !muted)}
+        //               text={micMuted ? 'Muted' : 'Mute'}
+        //               color={micMuted ? 'warning' : undefined} variant={micMuted ? 'solid' : 'outlined'} />
       )}
 
       {/* ended */}
