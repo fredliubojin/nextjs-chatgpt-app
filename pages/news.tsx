@@ -1,9 +1,9 @@
 import * as React from 'react';
 
-import AppNews from '../src/apps/news/AppNews';
+import { AppNews } from '../src/apps/news/AppNews';
 import { useMarkNewsAsSeen } from '../src/apps/news/news.hooks';
 
-import { AppLayout } from '~/common/layouts/AppLayout';
+import { AppLayout } from '~/common/layout/AppLayout';
 
 
 export default function NewsPage() {

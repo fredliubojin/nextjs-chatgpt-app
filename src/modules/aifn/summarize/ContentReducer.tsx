@@ -3,14 +3,14 @@ import { shallow } from 'zustand/shallow';
 
 import { Alert, Box, Button, CircularProgress, Divider, FormControl, FormHelperText, FormLabel, Modal, ModalClose, ModalDialog, Option, Select, Slider, Stack, Textarea, Typography } from '@mui/joy';
 
-import { DLLM, DLLMId } from '~/modules/llms/llm.types';
-import { summerizeToFitContextBudget } from '~/modules/aifn/summarize/summerize';
-import { useModelsStore } from '~/modules/llms/store-llms';
+import { DLLM, DLLMId, useModelsStore } from '~/modules/llms/store-llms';
+
+import { TokenBadge } from '../../../apps/chat/components/composer/TokenBadge';
 
 import { Section } from '~/common/components/Section';
 import { countModelTokens } from '~/common/util/token-counter';
 
-import { TokenBadge } from '../../../apps/chat/components/composer/TokenBadge';
+import { summerizeToFitContextBudget } from './summerize';
 
 
 function TokenUsageAlert({ usedTokens, tokenLimit }: { usedTokens: number, tokenLimit: number }) {
@@ -49,9 +49,9 @@ export function ContentReducer(props: {
   const remainingTokens = props.tokenLimit - reducedTokens;
 
 
-  const handleReducerModelChange = (event: any, value: DLLMId | null) => value && setReducerModelId(value);
+  const handleReducerModelChange = (_event: any, value: DLLMId | null) => value && setReducerModelId(value);
 
-  const handleCompressionLevelChange = (event: Event, newValue: number | number[]) => setCompressionLevel(newValue as number);
+  const handleCompressionLevelChange = (_event: Event, newValue: number | number[]) => setCompressionLevel(newValue as number);
 
   const handlePreviewClicked = async () => {
     setProcessing(true);
@@ -82,7 +82,7 @@ export function ContentReducer(props: {
 
         <ModalClose />
 
-        <Typography level='h5'>Content Reducer (preview)</Typography>
+        <Typography level='title-lg'>Content Reducer (preview)</Typography>
 
         <Divider sx={{ my: 2 }} />
 
@@ -91,13 +91,13 @@ export function ContentReducer(props: {
         <Section>
           <Stack direction='column' sx={{ gap: 2 }}>
 
-            <Typography level='body2'>
+            <Typography level='body-sm'>
               Input: <b>{props.initialTokens.toLocaleString()}</b> tokens · Limit: <b>{props.tokenLimit.toLocaleString()}</b> tokens
               <br />
               compression needed ≥ <b>{props.tokenLimit ? Math.round(100 * props.initialTokens / props.tokenLimit) : 0}</b> %
             </Typography>
 
-            <FormControl orientation='horizontal' sx={{ justifyContent: 'space-between' }}>
+            <FormControl orientation='horizontal' sx={{ justifyContent: 'space-between', alignItems: 'center' }}>
               <Box sx={{ minWidth: 120 }}>
                 <FormLabel>Reducer model</FormLabel>
                 <FormHelperText>{llms.find(llm => llm.id === reducerModelId)?.description?.slice(0, 10) ?? null}</FormHelperText>
@@ -157,8 +157,8 @@ export function ContentReducer(props: {
             {processing && (
               <Box sx={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
                 <CircularProgress />
-                <Typography level='body2' sx={{ mt: 1 }}>Reduction in progress.</Typography>
-                <Typography level='body3'>This can take a few minutes</Typography>
+                <Typography level='body-sm' sx={{ mt: 1 }}>Reduction in progress.</Typography>
+                <Typography level='body-xs'>This can take a few minutes</Typography>
               </Box>
             )}
 

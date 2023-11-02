@@ -1,19 +1,21 @@
 import { z } from 'zod';
-import { TRPCError } from '@trpc/server';
 
 import { HARDCODED_MODELS } from '~/modules/prodia/prodia.models';
-import { createTRPCRouter, publicProcedure } from '~/modules/trpc/trpc.server';
+import { createTRPCRouter, publicProcedure } from '~/server/api/trpc.server';
+import { fetchJsonOrTRPCError } from '~/server/api/trpc.serverutils';
 
 
 const imagineInputSchema = z.object({
   prodiaKey: z.string().optional(),
   prodiaModel: z.string(),
+  prodiaGen: z.enum(['sd', 'sdxl']).optional(),
   prompt: z.string(),
   negativePrompt: z.string().optional(),
   steps: z.number().optional(),
   cfgScale: z.number().optional(),
-  apectRatio: z.enum(['square', 'portrait', 'landscape']).optional(),
+  aspectRatio: z.enum(['square', 'portrait', 'landscape']).optional(),
   upscale: z.boolean().optional(),
+  resolution: z.string().optional(),
   seed: z.number().optional(),
 });
 
@@ -24,9 +26,7 @@ const modelsInputSchema = z.object({
 
 export const prodiaRouter = createTRPCRouter({
 
-  /**
-   * Generate an image, returning the URL where it's stored
-   */
+  /** Generate an image, returning the URL where it's stored */
   imagine: publicProcedure
     .input(imagineInputSchema)
     .query(async ({ input }) => {
@@ -36,24 +36,42 @@ export const prodiaRouter = createTRPCRouter({
       const tStart = Date.now();
 
       // crate the job, getting back a job ID
-      const jobRequest: JobRequest = {
+      let jobRequest: JobRequestSD | JobRequestSDXL;
+      const jobRequestCommon = {
         model: input.prodiaModel,
         prompt: input.prompt,
         ...(!!input.negativePrompt && { negative_prompt: input.negativePrompt }),
         ...(!!input.steps && { steps: input.steps }),
         ...(!!input.cfgScale && { cfg_scale: input.cfgScale }),
-        ...(!!input.apectRatio && input.apectRatio !== 'square' && { aspect_ratio: input.apectRatio }),
-        ...(!!input.upscale && { upscale: input.upscale }),
         ...(!!input.seed && { seed: input.seed }),
       };
-      let j: JobResponse = await createGenerationJob(input.prodiaKey, jobRequest);
+      // SDXL takes the resolution
+      if (input.prodiaGen === 'sdxl') {
+        const resTokens = input.resolution?.split('x');
+        const width = resTokens?.length === 2 ? parseInt(resTokens[0], 10) : undefined;
+        const height = resTokens?.length === 2 ? parseInt(resTokens[1], 10) : undefined;
+        jobRequest = {
+          ...jobRequestCommon,
+          ...(!!width && { width }),
+          ...(!!height && { height }),
+        };
+      }
+      // SD takes the aspect ratio and upscale
+      else {
+        jobRequest = {
+          ...jobRequestCommon,
+          ...(!!input.aspectRatio && input.aspectRatio !== 'square' && { aspect_ratio: input.aspectRatio }),
+          ...(!!input.upscale && { upscale: input.upscale }),
+        };
+      }
+      let j: JobResponse = await createGenerationJob(input.prodiaKey, input.prodiaGen === 'sdxl', jobRequest);
 
       // poll the job status until it's done
-      let sleepDelay = 2000;
+      let sleepDelay = 3000;
       while (j.status !== 'succeeded' && j.status !== 'failed' && (Date.now() - tStart) < (timeout * 1000)) {
         await new Promise(resolve => setTimeout(resolve, sleepDelay));
         j = await getJobStatus(input.prodiaKey, j.job);
-        if (sleepDelay > 250)
+        if (sleepDelay >= 300)
           sleepDelay /= 2;
       }
 
@@ -70,53 +88,69 @@ export const prodiaRouter = createTRPCRouter({
       };
     }),
 
-  /**
-   * List models - for now just hardcode the list, as there's no endpoint
-   */
+  /** List models - for now just hardcode the list, as there's no endpoint */
   listModels: publicProcedure
     .input(modelsInputSchema)
     .query(async ({ input }) => {
 
-      const { headers, url } = prodiaAccess(input.prodiaKey, `/v1/models/list`);
-      const response = await fetch(url, { headers });
-      await throwIfNot200(response, 'models/list');
-      const modelIds: string[] = await response.json();
+      // fetch in parallel both the SD and SDXL models
+      const { headers, url } = prodiaAccess(input.prodiaKey, `/v1/sd/models`);
+      const [sdModelIds, sdXlModelIds] = await Promise.all([
+        fetchJsonOrTRPCError<string[]>(url, 'GET', headers, undefined, 'Prodia'),
+        fetchJsonOrTRPCError<string[]>(url.replace('/sd/', '/sdxl/'), 'GET', headers, undefined, 'Prodia'),
+      ]);
+      const apiModelIDs = [...sdModelIds, ...sdXlModelIds];
 
       // filter and print the hardcoded models that are not in the API list
-      const hardcodedModels = HARDCODED_MODELS.models.filter(m => modelIds.includes(m.id));
-      const missingHardcoded = HARDCODED_MODELS.models.filter(m => !modelIds.includes(m.id));
-      if (missingHardcoded.length)
-        console.warn(`Prodia models missing from the API list: ${missingHardcoded.map(m => m.id).join(', ')}`);
+      const hardcodedRemoved = HARDCODED_MODELS.models.filter(m => !apiModelIDs.includes(m.id));
+      if (hardcodedRemoved.length)
+        console.warn(`Prodia models now removed from the API: ${hardcodedRemoved.map(m => m.id).join(', ')}`);
 
       // add and print the models that are not in the hardcoded list
-      const missingHardcodedIds = modelIds.filter(id => !HARDCODED_MODELS.models.find(m => m.id === id));
-      if (missingHardcodedIds.length) {
-        hardcodedModels.push(...missingHardcodedIds.map(id => ({
-          id, label: id.split('[')[0]
-            .replaceAll('_', ' ')
-            .replaceAll('.safetensors', '')
-            .trim(),
-        })));
-        console.log(`Prodia models missing from the hardcoded list: ${missingHardcodedIds.join(', ')}`);
+      const hardcodedExisting = HARDCODED_MODELS.models.filter(m => apiModelIDs.includes(m.id));
+      const missingHardcodedIDs = apiModelIDs.filter(id => !hardcodedExisting.find(m => m.id === id));
+      if (missingHardcodedIDs.length) {
+        console.log(`Prodia API models that are new to the hardcoded list: ${missingHardcodedIDs.join(', ')}`);
+        hardcodedExisting.push(...missingHardcodedIDs.map(id => {
+          const missingLabel = '[New] ' + id.split('[')[0].replaceAll('_', ' ').replaceAll('.safetensors', '').trim();
+          return { id, label: missingLabel, gen: (sdXlModelIds.includes(id) ? 'sdxl' : 'sd') as 'sd' | 'sdxl' };
+        }));
       }
 
+      // sort the models by priority, then isSDXL, then label
+      hardcodedExisting.sort((a, b) => {
+        const pa = a.priority || 0;
+        const pb = b.priority || 0;
+        if (pa !== pb) return pb - pa;
+        if (a.gen !== b.gen) return a.gen === 'sdxl' ? -1 : 1;
+        return a.label.localeCompare(b.label);
+      });
+
       // return the hardcoded models
-      return { models: hardcodedModels };
+      return { models: hardcodedExisting };
     }),
 
 });
 
 
-export interface JobRequest {
-  model: 'sdv1_4.ckpt [7460a6fa]' | string;
-  prompt: string;
-  // optional, and not even documented, but inferred from the response data
-  cfg_scale?: number;
-  steps?: number;
+interface JobRequestBase {
+  model: string,
+  prompt: string,
   negative_prompt?: string;
-  aspect_ratio?: 'square' | 'portrait' | 'landscape';
-  upscale?: boolean;
+  steps?: number;
+  cfg_scale?: number;
   seed?: number;
+  // sampler..
+}
+
+export interface JobRequestSD extends JobRequestBase {
+  upscale?: boolean;
+  aspect_ratio?: 'square' | 'portrait' | 'landscape';
+}
+
+export interface JobRequestSDXL extends JobRequestBase {
+  width?: number;
+  height?: number;
 }
 
 export interface JobResponse {
@@ -138,26 +172,14 @@ export interface JobResponse {
 }
 
 
-async function createGenerationJob(apiKey: string | undefined, jobRequest: JobRequest): Promise<JobResponse> {
-  const { headers, url } = prodiaAccess(apiKey, '/v1/job');
-  const response = await fetch(url, { method: 'POST', headers, body: JSON.stringify(jobRequest) });
-  await throwIfNot200(response, 'job');
-  return await response.json();
+async function createGenerationJob<TJobRequest extends JobRequestBase>(apiKey: string | undefined, isGenSDXL: boolean, jobRequest: TJobRequest): Promise<JobResponse> {
+  const { headers, url } = prodiaAccess(apiKey, isGenSDXL ? '/v1/sdxl/generate' : '/v1/sd/generate');
+  return await fetchJsonOrTRPCError<JobResponse, TJobRequest>(url, 'POST', headers, jobRequest, 'Prodia Job Create');
 }
 
 async function getJobStatus(apiKey: string | undefined, jobId: string): Promise<JobResponse> {
   const { headers, url } = prodiaAccess(apiKey, `/v1/job/${jobId}`);
-  const response = await fetch(url, { headers });
-  await throwIfNot200(response, 'job/status');
-  return await response.json();
-}
-
-async function throwIfNot200(response: Response, scope: string) {
-  if (response.status !== 200) {
-    const errorMessage = await response.text().catch(() => null) || response.statusText || '' + response.status || 'Unknown Error';
-    console.log(`Bad Prodia ${scope} response: ${errorMessage}`);
-    throw new TRPCError({ code: 'BAD_REQUEST', message: errorMessage });
-  }
+  return await fetchJsonOrTRPCError<JobResponse>(url, 'GET', headers, undefined, 'Prodia Job Status');
 }
 
 

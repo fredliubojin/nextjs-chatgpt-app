@@ -1,10 +1,11 @@
 import * as React from 'react';
 
-import { Alert, Box, Button, CircularProgress, IconButton, LinearProgress, Modal, ModalClose, Option, Select, Sheet, Typography } from '@mui/joy';
+import { Box, Button, CircularProgress, IconButton, LinearProgress, Modal, ModalClose, Option, Select, Sheet, Typography } from '@mui/joy';
 import DownloadIcon from '@mui/icons-material/Download';
 import InfoIcon from '@mui/icons-material/Info';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 
+import { InlineError } from '~/common/components/InlineError';
 import { useCameraCapture } from '~/common/components/useCameraCapture';
 
 
@@ -129,11 +130,11 @@ export function CameraCaptureModal(props: { onCloseModal: () => void, onOCR: (oc
         {/* Bottom controls (zoom, ocr, download) & progress */}
         <Sheet variant='soft' sx={{ display: 'flex', flexDirection: 'column', zIndex: 20, gap: 1, p: 1 }}>
 
-          {!!error && <Alert variant='soft' color='warning'><Typography>Issue: {error}</Typography></Alert>}
+          {!!error && <InlineError error={error} />}
 
           {zoomControl}
 
-          {ocrProgress !== null && <LinearProgress color='success' determinate value={100 * ocrProgress} sx={{ px: 2 }} />}
+          {ocrProgress !== null && <LinearProgress color='primary' determinate value={100 * ocrProgress} sx={{ px: 2 }} />}
 
           <Box sx={{ display: 'flex', gap: 1, justifyContent: 'space-between' }}>
             <IconButton disabled={!info} variant='soft' color='neutral' size='lg' onClick={() => setShowInfo(info => !info)} sx={{ zIndex: 30 }}>

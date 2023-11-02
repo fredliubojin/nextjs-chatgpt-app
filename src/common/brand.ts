@@ -14,7 +14,7 @@ export const Brand = {
   Meta: {
     Description: 'Leading open-source AI web interface to help you learn, think, and do. AI personas, superior privacy, advanced features, and fun UX.',
     SiteName: 'big-AGI | Harnessing AI for You',
-    ThemeColor: '#434356',
+    ThemeColor: '#32383E',
     TwitterSite: '@enricoros',
   },
   URIs: {
@@ -24,5 +24,6 @@ export const Brand = {
     OpenRepo: 'https://github.com/enricoros/big-agi',
     SupportInvite: 'https://discord.gg/MkH4qj2Jp9',
     // Twitter: 'https://www.twitter.com/enricoros',
+    PrivacyPolicy: 'https://big-agi.com/privacy',
   },
 };

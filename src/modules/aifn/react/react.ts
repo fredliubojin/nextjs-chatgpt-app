@@ -2,9 +2,9 @@
  * porting of implementation from here: https://til.simonwillison.net/llms/python-react-pattern
  */
 
-import { DLLMId } from '~/modules/llms/llm.types';
+import { DLLMId } from '~/modules/llms/store-llms';
 import { callApiSearchGoogle } from '~/modules/google/search.client';
-import { callChatGenerate, VChatMessageIn } from '~/modules/llms/llm.client';
+import { callChatGenerate, VChatMessageIn } from '~/modules/llms/transports/chatGenerate';
 
 
 // prompt to implement the ReAct paradigm: https://arxiv.org/abs/2210.03629
@@ -172,9 +172,9 @@ async function search(query: string): Promise<string> {
   try {
     const data = await callApiSearchGoogle(query);
     return JSON.stringify(data);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching search results:', error);
-    return 'An error occurred while searching the internet. Missing Google API Key?';
+    return 'An error occurred while searching the internet. Missing Google API Key? Google error: ' + (error?.message || error?.toString() || 'Unknown error');
   }
 }
 

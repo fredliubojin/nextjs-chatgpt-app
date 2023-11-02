@@ -4,10 +4,17 @@ import { Box, Button, IconButton, Tooltip, Typography } from '@mui/joy';
 import { SxProps } from '@mui/joy/styles/types';
 import WebIcon from '@mui/icons-material/Web';
 
-import { HtmlBlock } from './Block';
+import { HtmlBlock } from './blocks';
 
 
-const IFrameComponent = (props: { htmlString: string }) => {
+// this is used by the blocks parser (for full text detection) and by the Code component (for inline rendering)
+export function heuristicIsHtml(text: string): boolean {
+  // noinspection HtmlRequiredTitleElement
+  return text.startsWith('<!DOCTYPE html') || text.startsWith('<head>\n');
+}
+
+
+export const IFrameComponent = (props: { htmlString: string }) => {
   const iframeRef = React.useRef<HTMLIFrameElement>(null);
 
   React.useEffect(() => {

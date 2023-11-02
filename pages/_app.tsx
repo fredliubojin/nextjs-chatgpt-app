@@ -6,8 +6,9 @@ import { CacheProvider, EmotionCache } from '@emotion/react';
 import { CssBaseline, CssVarsProvider } from '@mui/joy';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-import { apiQuery } from '~/modules/trpc/trpc.client';
+import { apiQuery } from '~/common/util/trpc.client';
 
+import 'katex/dist/katex.min.css';
 import '~/common/styles/CodePrism.css'
 import '~/common/styles/GithubMarkdown.css';
 import { Brand } from '~/common/brand';

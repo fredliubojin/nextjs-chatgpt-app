@@ -34,50 +34,36 @@ export const theme = extendTheme({
     body: inter.style.fontFamily,
     code: jetBrainsMono.style.fontFamily,
   },
-  /*typography: {
-    display1: {
-      fontSize: 'var(--joy-fontSize-xl5, 3rem)',
-      background: 'linear-gradient(-30deg, var(--joy-palette-primary-plainColor), var(--joy-palette-primary-solidBg))',
-      WebkitBackgroundClip: 'text',
-      WebkitTextFillColor: 'transparent',
-    },
-  },*/
   colorSchemes: {
     light: {
       palette: {
-        background: {
-          body: 'var(--joy-palette-neutral-300, #B9B9C6)', // background.level4
-        },
-        primary: {
-          // 50: '#F4FAFF', // softBg
-          100: '#f0f8ff', // plainHoverBg  -  #DDF1FF | #f0f4ff | #f0f8ff (aliceblue)
-          // 200: '#ADDBFF',
-          // 300: '#6FB6FF',
-          // 400: '#3990FF',
-          // 500: '#096BDE', // solidBg [Button.solid]  -  #096BDE | #0D46D7 (suggested)
-          // 600: '#054DA7', // solidHoverBg [IconButton.plain (fg)]
-          // 700: '#02367D',
-          // 800: '#072859',
-          // 900: '#00153C',
-        },
         neutral: {
-          solidBg: 'var(--joy-palette-neutral-700, #434356)',
-          solidHoverBg: 'var(--joy-palette-neutral-800, #25252D)', // hover Neutral buttons (App Bar)
-          // 50: '#F7F7F8',
-          // 100: '#EBEBEF',
-          // 200: '#D8D8DF',
-          // 300: '#B9B9C6',
-          // 400: '#8F8FA3',
-          // 500: '#73738C',
-          // 600: '#5A5A72', // solidBg [Button.solid]
-          // 700: '#434356', // solidHoverBg
-          // 800: '#25252D',
-          // 900: '#131318',
+          plainColor: 'var(--joy-palette-neutral-800)',     // increase contrast a bit - Menu text
+          solidBg: 'var(--joy-palette-neutral-700)',        // AppBar: background (#32383E)
+          solidHoverBg: 'var(--joy-palette-neutral-800)',   // AppBar: buttons background on hover
         },
+        text: {
+          icon: 'var(--joy-palette-neutral-700)',           // <IconButton color='neutral' /> icon color
+          secondary: 'var(--joy-palette-neutral-800)',      // increase contrast a bit
+          // tertiary: 'var(--joy-palette-neutral-700)',
+        },
+        background: {
+          // popup | surface > level1 > level2 > level3 > body
+          body: 'var(--joy-palette-neutral-400, #9FA6AD)',  // Body: background
+          popup: '#fff',
+        },
+        // common: {
+        //   white: '#fff',
+        // },
       },
     },
     dark: {
       palette: {
+        text: {
+          // do not increase contrast - text.primary would scream at you
+          // secondary: 'var(--joy-palette-neutral-100, #EAEEF6)',
+          // tertiary: 'var(--joy-palette-neutral-400, #9FA6AD)',
+        },
         background: {
           surface: 'var(--joy-palette-neutral-900, #131318)',
           level1: 'var(--joy-palette-common-black, #09090D)',
@@ -86,49 +72,110 @@ export const theme = extendTheme({
         },
       },
     },
+  },
+  components: {
+    /**
+     * IconButton
+     *  - enlarge 'md' a bit: https://github.com/mui/material-ui/commit/7f81475ea148a416ec8fab252120ce6567c62897#diff-45dca083057933d78377b59e031146804cfedb68fe1514955bc8a5b3c38d7c44
+     */
+    JoyIconButton: {
+      styleOverrides: {
+        root: ({ ownerState }) => ({
+          ...(ownerState.instanceSize && {
+            '--IconButton-size': { sm: '2rem', md: '2.5rem', lg: '3rem' }[ownerState.instanceSize],
+          }),
+          ...(ownerState.size === 'md' && {
+            '--Icon-fontSize': 'calc(var(--IconButton-size, 2.5rem) / 1.667)',
+            '--CircularProgress-size': '24px',
+            '--CircularProgress-thickness': '3px',
+            minWidth: 'var(--IconButton-size, 2.5rem)',
+            minHeight: 'var(--IconButton-size, 2.5rem)',
+          }),
+        }),
+      },
+    },
 
+    /**
+     * Input
+     *  - remove the box-shadow: https://github.com/mui/material-ui/commit/8d4728df8a66d710660af96ac7ff3f86d2d26382
+     */
+    JoyInput: {
+      styleOverrides: {
+        root: {
+          boxShadow: 'none',
+        },
+      },
+    },
+
+    /**
+     * Select
+     * - remove the box-shadow: https://github.com/mui/material-ui/commit/8d4728df8a66d710660af96ac7ff3f86d2d26382
+     * */
+    JoySelect: {
+      styleOverrides: {
+        root: {
+          boxShadow: 'none',
+        },
+      },
+    },
+
+    /**
+     * Switch: increase the size of the thumb, to a default iconButton
+     * NOTE: do not use anything else than 'md' size
+     */
+    JoySwitch: {
+      styleOverrides: {
+        root: ({ ownerState }) => ({
+          ...(ownerState.size === 'md' && {
+            '--Switch-trackWidth': '40px',
+            '--Switch-trackHeight': '24px',
+            '--Switch-thumbSize': '18px',
+          }),
+        }),
+      },
+    },
   },
 });
 
 export const bodyFontClassName = inter.className;
 
 export const cssRainbowColorKeyframes = keyframes`
-  100%, 0% {
-    color: rgb(255, 0, 0);
-  }
-  8% {
-    color: rgb(204, 102, 0);
-  }
-  16% {
-    color: rgb(128, 128, 0);
-  }
-  25% {
-    color: rgb(77, 153, 0);
-  }
-  33% {
-    color: rgb(0, 179, 0);
-  }
-  41% {
-    color: rgb(0, 153, 82);
-  }
-  50% {
-    color: rgb(0, 128, 128);
-  }
-  58% {
-    color: rgb(0, 102, 204);
-  }
-  66% {
-    color: rgb(0, 0, 255);
-  }
-  75% {
-    color: rgb(127, 0, 255);
-  }
-  83% {
-    color: rgb(153, 0, 153);
-  }
-  91% {
-    color: rgb(204, 0, 102);
-  }`;
+    100%, 0% {
+        color: rgb(255, 0, 0);
+    }
+    8% {
+        color: rgb(204, 102, 0);
+    }
+    16% {
+        color: rgb(128, 128, 0);
+    }
+    25% {
+        color: rgb(77, 153, 0);
+    }
+    33% {
+        color: rgb(0, 179, 0);
+    }
+    41% {
+        color: rgb(0, 153, 82);
+    }
+    50% {
+        color: rgb(0, 128, 128);
+    }
+    58% {
+        color: rgb(0, 102, 204);
+    }
+    66% {
+        color: rgb(0, 0, 255);
+    }
+    75% {
+        color: rgb(127, 0, 255);
+    }
+    83% {
+        color: rgb(153, 0, 153);
+    }
+    91% {
+        color: rgb(204, 0, 102);
+    }`;
 
 
 // Emotion Cache (with insertion point on the SSR pass)
