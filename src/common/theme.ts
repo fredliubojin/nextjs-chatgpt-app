@@ -38,23 +38,19 @@ export const theme = extendTheme({
     light: {
       palette: {
         neutral: {
-          plainColor: 'var(--joy-palette-neutral-800)',     // increase contrast a bit - Menu text
-          solidBg: 'var(--joy-palette-neutral-700)',        // AppBar: background (#32383E)
-          solidHoverBg: 'var(--joy-palette-neutral-800)',   // AppBar: buttons background on hover
+          plainColor: 'var(--joy-palette-neutral-800)',     // [700 -> 800] Dropdown menu: increase text contrast a bit
+          solidBg: 'var(--joy-palette-neutral-700)',        // [500 -> 700] AppBar background & Button[solid]
+          solidHoverBg: 'var(--joy-palette-neutral-800)',   // [600 -> 800] Buttons[solid]:hover
         },
+        // primary [800] > secondary [700 -> 800] > tertiary [600] > icon [500 -> 700]
         text: {
           icon: 'var(--joy-palette-neutral-700)',           // <IconButton color='neutral' /> icon color
           secondary: 'var(--joy-palette-neutral-800)',      // increase contrast a bit
-          // tertiary: 'var(--joy-palette-neutral-700)',
         },
+        // popup [white] > surface [50] > level1 [100] > level2 [200] > level3 [300] > body [white -> 400]
         background: {
-          // popup | surface > level1 > level2 > level3 > body
-          body: 'var(--joy-palette-neutral-400, #9FA6AD)',  // Body: background
-          popup: '#fff',
+          body: 'var(--joy-palette-neutral-400, #9FA6AD)',  // background to stand back after all levels
         },
-        // common: {
-        //   white: '#fff',
-        // },
       },
     },
     dark: {
