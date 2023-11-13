@@ -1,6 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { createEmptyReadableStream, safeErrorString, serverFetchOrThrow } from '~/server/wire';
 
-import { createEmptyReadableStream, throwIfResponseNotOk } from '~/modules/llms/transports/server/openai.streaming';
 import { elevenlabsAccess, elevenlabsVoiceId, ElevenlabsWire, speechInputSchema } from '~/modules/elevenlabs/elevenlabs.router';
 
 
@@ -13,8 +12,7 @@ response as an ArrayBuffer. Unfortunately this means duplicating the code in the
 and client-side vs. the tRPC implementation. So at lease we recycle the input structures.
 
 */
-
-export default async function handler(req: NextRequest) {
+const handler = async (req: Request) => {
   try {
 
     // construct the upstream request
@@ -30,8 +28,7 @@ export default async function handler(req: NextRequest) {
     };
 
     // elevenlabs POST
-    const upstreamResponse: Response = await fetch(url, { method: 'POST', headers, body: JSON.stringify(body) });
-    await throwIfResponseNotOk(upstreamResponse);
+    const upstreamResponse: Response = await serverFetchOrThrow(url, 'POST', headers, body);
 
     // NOTE: this is disabled, as we pass-through what we get upstream for speed, as it is not worthy
     //       to wait for the entire audio to be downloaded before we send it to the client
@@ -42,14 +39,14 @@ export default async function handler(req: NextRequest) {
 
     // stream the data to the client
     const audioReadableStream = upstreamResponse.body || createEmptyReadableStream();
-    return new NextResponse(audioReadableStream, { status: 200, headers: { 'Content-Type': 'audio/mpeg' } });
+    return new Response(audioReadableStream, { status: 200, headers: { 'Content-Type': 'audio/mpeg' } });
 
   } catch (error: any) {
-    const fetchOrVendorError = (error?.message || typeof error === 'string' ? error : JSON.stringify(error)) + (error?.cause ? ' · ' + error.cause : '');
+    const fetchOrVendorError = safeErrorString(error) + (error?.cause ? ' · ' + error.cause : '');
     console.log(`api/elevenlabs/speech: fetch issue: ${fetchOrVendorError}`);
-    return new NextResponse('[ElevenLabs Issue] ' + fetchOrVendorError, { status: 500 });
+    return new Response(`[Issue] elevenlabs: ${fetchOrVendorError}`, { status: 500 });
   }
-}
+};
 
-// noinspection JSUnusedGlobalSymbols
 export const runtime = 'edge';
+export { handler as POST };

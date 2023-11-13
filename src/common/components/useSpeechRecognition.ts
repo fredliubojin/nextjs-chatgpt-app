@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { CapabilityBrowserSpeechRecognition } from './useCapabilities';
-import { isChromeOnDesktopWindows, isIPhone } from '../util/pwaUtils';
+import { isChromeOnDesktop, isIPhone } from '../util/pwaUtils';
 import { useGlobalShortcut } from './useGlobalShortcut';
 import { useUIPreferencesStore } from '../state/store-ui';
 
@@ -38,6 +38,7 @@ export const browserSpeechRecognitionCapability = (): CapabilityBrowserSpeechRec
 export const useSpeechRecognition = (onResultCallback: (result: SpeechResult) => void, softStopTimeout: number, useShortcutCtrlKey?: string) => {
   // enablers
   const refRecognition = React.useRef<ISpeechRecognition | null>(null);
+  const onResultCallbackRef = React.useRef(onResultCallback);
 
   // session
   const [isSpeechEnabled, setIsSpeechEnabled] = React.useState<boolean>(false);
@@ -49,6 +50,11 @@ export const useSpeechRecognition = (onResultCallback: (result: SpeechResult) =>
 
   // external state (will update this function when changed)
   const preferredLanguage = useUIPreferencesStore(state => state.preferredLanguage);
+
+  // Update the ref each time the component calling the hook re-renders with a new callback
+  React.useEffect(() => {
+    onResultCallbackRef.current = onResultCallback;
+  }, [onResultCallback]);
 
   // create the Recognition engine
   React.useEffect(() => {
@@ -79,7 +85,7 @@ export const useSpeechRecognition = (onResultCallback: (result: SpeechResult) =>
 
     const instance = new webSpeechAPI();
     instance.lang = preferredLanguage;
-    instance.interimResults = isChromeOnDesktopWindows() && softStopTimeout > 0;
+    instance.interimResults = isChromeOnDesktop() && softStopTimeout > 0;
     instance.maxAlternatives = 1;
     instance.continuous = true;
 
@@ -115,7 +121,7 @@ export const useSpeechRecognition = (onResultCallback: (result: SpeechResult) =>
       speechResult.transcript = '';
       speechResult.interimTranscript = 'Listening...';
       speechResult.done = false;
-      onResultCallback(speechResult);
+      onResultCallbackRef.current(speechResult);
       // let the system handle the first stop (as long as possible)
       // if (instance.interimResults)
       //   reloadInactivityTimeout(2 * softStopTimeout);
@@ -127,7 +133,7 @@ export const useSpeechRecognition = (onResultCallback: (result: SpeechResult) =>
       clearInactivityTimeout();
       speechResult.interimTranscript = '';
       speechResult.done = true;
-      onResultCallback(speechResult);
+      onResultCallbackRef.current(speechResult);
     };
 
     instance.onerror = event => {
@@ -143,7 +149,7 @@ export const useSpeechRecognition = (onResultCallback: (result: SpeechResult) =>
       // coalesce all the final pieces into a cohesive string
       speechResult.transcript = '';
       speechResult.interimTranscript = '';
-      for (let result of event.results) {
+      for (const result of event.results) {
         let chunk = result[0]?.transcript?.trim();
         if (!chunk)
           continue;
@@ -170,7 +176,7 @@ export const useSpeechRecognition = (onResultCallback: (result: SpeechResult) =>
       }
 
       // update the UI
-      onResultCallback(speechResult);
+      onResultCallbackRef.current(speechResult);
 
       // auto-stop
       if (instance.interimResults)
@@ -182,7 +188,7 @@ export const useSpeechRecognition = (onResultCallback: (result: SpeechResult) =>
     refStarted.current = false;
     setIsSpeechEnabled(true);
 
-  }, [onResultCallback, preferredLanguage, softStopTimeout]);
+  }, [preferredLanguage, softStopTimeout]);
 
 
   // ACTIONS: start/stop recording
@@ -218,7 +224,7 @@ export const useSpeechRecognition = (onResultCallback: (result: SpeechResult) =>
       startRecording();
   }, [startRecording, stopRecording]);
 
-  useGlobalShortcut(useShortcutCtrlKey, true, false, toggleRecording);
+  useGlobalShortcut(useShortcutCtrlKey, true, false, false, toggleRecording);
 
   return {
     isRecording,

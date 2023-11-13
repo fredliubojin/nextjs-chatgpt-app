@@ -3,14 +3,10 @@ import { shallow } from 'zustand/shallow';
 
 import { Avatar, Badge, Box, Button, IconButton, ListItemDecorator, MenuItem, Option, Select, Typography } from '@mui/joy';
 import AddIcon from '@mui/icons-material/Add';
-import CloudDoneOutlinedIcon from '@mui/icons-material/CloudDoneOutlined';
-import CloudOutlinedIcon from '@mui/icons-material/CloudOutlined';
-import ComputerIcon from '@mui/icons-material/Computer';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 
-import { DModelSourceId, useModelsStore } from '~/modules/llms/store-llms';
-import { IModelVendor, ModelVendorId } from '~/modules/llms/vendors/IModelVendor';
-import { ModelVendorOpenAI } from '~/modules/llms/vendors/openai/openai.vendor';
+import { type DModelSourceId, useModelsStore } from '~/modules/llms/store-llms';
+import { type IModelVendor, type ModelVendorId } from '~/modules/llms/vendors/IModelVendor';
 import { createModelSourceForVendor, findAllVendors, findVendorById } from '~/modules/llms/vendors/vendor.registry';
 
 import { CloseableMenu } from '~/common/components/CloseableMenu';
@@ -18,11 +14,11 @@ import { ConfirmationModal } from '~/common/components/ConfirmationModal';
 import { hideOnDesktop, hideOnMobile } from '~/common/theme';
 
 
-function locationIcon(vendor?: IModelVendor | null) {
+/*function locationIcon(vendor?: IModelVendor | null) {
   if (vendor && vendor.id === 'openai' && ModelVendorOpenAI.hasServerKey)
     return <CloudDoneOutlinedIcon />;
   return !vendor ? null : vendor.location === 'local' ? <ComputerIcon /> : <CloudOutlinedIcon />;
-}
+}*/
 
 function vendorIcon(vendor: IModelVendor | null, greenMark: boolean) {
   let icon: React.JSX.Element | null = null;
@@ -107,7 +103,7 @@ export function ModelsSourceSelector(props: {
   const sourceItems = React.useMemo(() => modelSources.map(source => {
     return {
       source,
-      icon: locationIcon(findVendorById(source.vId)),
+      icon: vendorIcon(findVendorById(source.vId), false),
       component: <Option key={source.id} value={source.id}>{source.label}</Option>,
     };
   }), [modelSources]);
@@ -120,7 +116,7 @@ export function ModelsSourceSelector(props: {
 
       {/* Models: [Select] Add Delete */}
       <Typography sx={{ mr: 1, ...hideOnMobile }}>
-        Vendor:
+        Service:
       </Typography>
 
       <Select

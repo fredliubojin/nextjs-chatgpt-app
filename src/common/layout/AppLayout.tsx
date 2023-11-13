@@ -23,8 +23,7 @@ export function AppLayout(props: {
   const { centerMode } = useUIPreferencesStore(state => ({ centerMode: isPwa() ? 'full' : state.centerMode }), shallow);
 
   // usage counter, for progressive disclosure of features
-  // noinspection JSUnusedLocalSymbols
-  const usageCount = useAppStateStore(state => state.usageCount);
+  useAppStateStore(state => state.usageCount);
 
   return (
     // Global NoSSR wrapper: the overall Container could have hydration issues when using localStorage and non-default maxWidth
@@ -57,8 +56,10 @@ export function AppLayout(props: {
 
       </Container>
 
+      {/* Overlay Settings */}
       <SettingsModal />
 
+      {/* Overlay Models (& Model Options )*/}
       <ModelsModal suspendAutoModelsSetup={props.suspendAutoModelsSetup} />
 
     </NoSSR>
