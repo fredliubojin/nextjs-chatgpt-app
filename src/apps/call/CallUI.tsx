@@ -17,7 +17,7 @@ import { EXPERIMENTAL_speakTextStream } from '~/modules/elevenlabs/elevenlabs.cl
 import { SystemPurposeId, SystemPurposes } from '../../data';
 import { VChatMessageIn } from '~/modules/llms/transports/chatGenerate';
 import { streamChat } from '~/modules/llms/transports/streamChat';
-import { useVoiceDropdown } from '~/modules/elevenlabs/useVoiceDropdown';
+import { useElevenLabsVoiceDropdown } from '~/modules/elevenlabs/useElevenLabsVoiceDropdown';
 
 import { Link } from '~/common/components/Link';
 import { SpeechResult, useSpeechRecognition } from '~/common/components/useSpeechRecognition';
@@ -39,7 +39,7 @@ function CallMenuItems(props: {
 }) {
 
   // external state
-  const { voicesDropdown } = useVoiceDropdown(false, !props.override);
+  const { voicesDropdown } = useElevenLabsVoiceDropdown(false, !props.override);
 
   const handlePushToTalkToggle = () => props.setPushToTalk(!props.pushToTalk);
 
@@ -113,7 +113,7 @@ export function CallUI(props: {
         setCallMessages(messages => [...messages, createDMessage('user', transcribed)]);
     }
   }, []);
-  const { isSpeechEnabled, isRecording, isRecordingAudio, isRecordingSpeech, startRecording, stopRecording, toggleRecording } = useSpeechRecognition(onSpeechResultCallback, 1000);
+  const { isSpeechEnabled, isRecording, isRecordingAudio, isRecordingSpeech, startRecording, stopRecording, toggleRecording } = useSpeechRecognition(onSpeechResultCallback, 1000, false);
 
   // derived state
   const isRinging = stage === 'ring';

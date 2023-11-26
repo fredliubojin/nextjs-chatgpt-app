@@ -1,101 +1,110 @@
 import * as React from 'react';
 
-import { Box, Button, Divider, FormControl, FormHelperText, FormLabel, Input, Option, Select, Typography } from '@mui/joy';
+import { Box, Button, FormControl, Input, Option, Select, Stack, Typography } from '@mui/joy';
 
+import { FormLabelStart } from '~/common/components/forms/FormLabelStart';
 import { GoodModal } from '~/common/components/GoodModal';
 import { apiQuery } from '~/common/util/trpc.client';
-import { settingsGap } from '~/common/theme';
+import { settingsGap } from '~/common/app.theme';
 
 import type { OllamaAccessSchema } from '../../transports/server/ollama/ollama.router';
+import { InlineError } from '~/common/components/InlineError';
 
 
 export function OllamaAdmin(props: { access: OllamaAccessSchema, onClose: () => void }) {
 
   // state
-  const [pullModel, setPullModel] = React.useState<string | null>('llama2');
-  const [pullTag, setPullTag] = React.useState<string>('');
+  const [modelName, setModelName] = React.useState<string | null>('llama2');
+  const [modelTag, setModelTag] = React.useState<string>('');
 
   // external state
   const { data: pullable } = apiQuery.llmOllama.adminListPullable.useQuery({ access: props.access }, {
     staleTime: 1000 * 60,
     refetchOnWindowFocus: false,
   });
-  const {
-    data: pullData, isLoading: isPulling, status: pullStatus, error: pullModelError,
-    mutate: pullMutate,
-  } = apiQuery.llmOllama.adminPull.useMutation();
+  const { data: pullData, isLoading: isPulling, status: pullStatus, error: pullError, mutate: pullMutate, reset: pullReset } = apiQuery.llmOllama.adminPull.useMutation();
+  const { isLoading: isDeleting, status: deleteStatus, error: deleteError, mutate: deleteMutate, reset: deleteReset } = apiQuery.llmOllama.adminDelete.useMutation();
 
   // derived state
-  const pullModelDescription = pullable?.pullable.find(p => p.id === pullModel)?.description ?? null;
+  const pullModelDescription = pullable?.pullable.find(p => p.id === modelName)?.description ?? null;
 
-  const handlePull = () => {
-    if (pullModel) {
-      pullMutate({
-        access: props.access,
-        name: pullModel + (pullTag ? ':' + pullTag : ''),
-      });
-    }
+  const handleModelPull = () => {
+    deleteReset();
+    modelName && pullMutate({ access: props.access, name: modelName + (modelTag ? ':' + modelTag : '') });
+  };
+
+  const handleModelDelete = () => {
+    pullReset();
+    modelName && deleteMutate({ access: props.access, name: modelName + (modelTag ? ':' + modelTag : '') });
   };
 
   return (
-    <GoodModal title='Ollama Administration' open onClose={props.onClose}>
+    <GoodModal title='Ollama Administration' dividers open onClose={props.onClose}>
 
-      <Divider />
-
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+      <Stack direction='column' sx={{ gap: settingsGap }}>
         <Typography level='body-sm'>
           We assume your Ollama host is running and models are already available.
           However we provide a way to pull models from the Ollama host, for convenience.
         </Typography>
 
-        <Box sx={{ display: 'flex', gap: 1, mt: settingsGap }}>
+        <Box sx={{ display: 'flex', gap: 1 }}>
           <FormControl sx={{ flexGrow: 1 }}>
-            <FormLabel>
-              Name
-            </FormLabel>
-            <Select value={pullModel || ''} onChange={(_event: any, value: string | null) => setPullModel(value)}>
+            <FormLabelStart title='Name' />
+            <Select value={modelName || ''} onChange={(_event: any, value: string | null) => setModelName(value)}>
               {pullable?.pullable.map(p =>
                 <Option key={p.id} value={p.id}>{p.id}</Option>,
               )}
             </Select>
           </FormControl>
           <FormControl sx={{ flexGrow: 1 }}>
-            <FormLabel>
-              Tag
-            </FormLabel>
+            <FormLabelStart title='Tag' />
             <Input
               variant='outlined' placeholder='latest'
-              value={pullTag || ''} onChange={event => setPullTag(event.target.value)}
+              value={modelTag || ''} onChange={event => setModelTag(event.target.value)}
               sx={{ minWidth: 100 }}
               slotProps={{ input: { size: 10 } }} // halve the min width
             />
           </FormControl>
         </Box>
 
+
+        {/* Status*/}
+        {!!pullData && (pullData.error
+          ? <Typography color='danger'>{pullData.error}</Typography>
+          : <Typography color='success'>{pullData.status || 'Ok, but unkown status'}</Typography>)}
+        {!!pullError && <InlineError error={pullError} />}
+        {!!deleteError && <InlineError error={deleteError} />}
+
+
+        {/* Description and Buttons */}
         <Box sx={{ display: 'flex', gap: 1, justifyContent: 'space-between' }}>
-          <Box>
-            <FormHelperText color={pullModelError !== null ? 'danger' : undefined}>
-              {pullModelError?.message || pullModelDescription}
-            </FormHelperText>
-            {!!pullData?.error
-              ? <Typography color='danger'>{pullData.error}</Typography>
-              : !!pullData?.status
-                ? <Typography color='success'>{pullData.status}</Typography>
-                : null
-            }
+
+          <Typography level='body-sm'>
+            {pullModelDescription}
+          </Typography>
+
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Button
+              variant='outlined'
+              color={deleteStatus === 'error' ? 'danger' : deleteStatus === 'success' ? 'success' : 'primary'}
+              loading={isDeleting} disabled={isPulling} onClick={handleModelDelete}
+              sx={{ minWidth: 100 }}
+            >
+              Delete
+            </Button>
+
+            <Button
+              color={pullStatus === 'error' ? 'danger' : pullStatus === 'success' ? 'success' : 'primary'}
+              loading={isPulling} disabled={isDeleting} onClick={handleModelPull}
+              sx={{ minWidth: 100 }}
+            >
+              Pull
+            </Button>
           </Box>
-          <Button
-            color={pullStatus === 'error' ? 'danger' : pullStatus === 'success' ? 'success' : 'primary'}
-            loading={isPulling} onClick={handlePull}
-            sx={{ minWidth: 100 }}
-          >
-            Pull
-          </Button>
+
         </Box>
 
-      </Box>
-
-      <Divider />
+      </Stack>
 
     </GoodModal>
   );

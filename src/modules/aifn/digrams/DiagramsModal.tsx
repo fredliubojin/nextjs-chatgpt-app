@@ -46,7 +46,7 @@ export function DiagramsModal(props: { config: DiagramConfig, onClose: () => voi
   // state
   const [showOptions, setShowOptions] = React.useState(true);
   const [message, setMessage] = React.useState<DMessage | null>(null);
-  const [diagramType, diagramComponent] = useFormRadio<DiagramType>('auto', diagramTypes, 'Visualization');
+  const [diagramType, diagramComponent] = useFormRadio<DiagramType>('auto', diagramTypes, 'Visualize');
   const [diagramLanguage, languageComponent] = useFormRadio<DiagramLanguage>('plantuml', diagramLanguages, 'Style');
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
   const [abortController, setAbortController] = React.useState<AbortController | null>(null);
@@ -130,8 +130,8 @@ export function DiagramsModal(props: { config: DiagramConfig, onClose: () => voi
     open onClose={props.onClose}
     sx={{ maxWidth: { xs: '100vw', md: '95vw' } }}
     startButton={
-      <Button variant='solid' color='primary' disabled={!message || !!abortController} endDecorator={<TelegramIcon />} onClick={handleInsertAndClose}>
-        Insert in Chat
+      <Button variant='soft' color='success' disabled={!message || !!abortController} endDecorator={<TelegramIcon />} onClick={handleInsertAndClose}>
+        Add To Chat
       </Button>
     }
   >
@@ -146,7 +146,7 @@ export function DiagramsModal(props: { config: DiagramConfig, onClose: () => voi
             {languageComponent}
           </Grid>
         )}
-        <Grid xs={12}>
+        <Grid xs={12} xl={6}>
           {llmComponent}
         </Grid>
       </Grid>
@@ -176,7 +176,7 @@ export function DiagramsModal(props: { config: DiagramConfig, onClose: () => voi
 
     {!!message && (!abortController || showOptions) && (
       <ChatMessage
-        message={message} hideAvatars noBottomBorder noMarkdown filterOnlyCode
+        message={message} hideAvatars noBottomBorder noMarkdown diagramMode
         codeBackground='background.surface'
         onMessageEdit={(text) => setMessage({ ...message, text })}
         sx={{
