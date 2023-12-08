@@ -15,10 +15,10 @@ import { useBrowseStore } from '~/modules/browse/store-module-browsing';
 import { useModelsStore } from '~/modules/llms/store-llms';
 
 import { ConfirmationModal } from '~/common/components/ConfirmationModal';
+import { GlobalShortcutItem, ShortcutKeyName, useGlobalShortcuts } from '~/common/components/useGlobalShortcut';
 import { addSnackbar, removeSnackbar } from '~/common/components/useSnackbarsStore';
 import { createDMessage, DConversationId, DMessage, getConversation, useConversation } from '~/common/state/store-chats';
-import { GlobalShortcutItem, ShortcutKeyName, useGlobalShortcuts } from '~/common/components/useGlobalShortcut';
-import { useLayoutPluggable } from '~/common/layout/store-applayout';
+import { openLayoutLLMOptions, useLayoutPluggable } from '~/common/layout/store-applayout';
 import { useUXLabsStore } from '~/common/state/store-ux-labs';
 
 import { ChatDrawerItemsMemo } from './components/applayout/ChatDrawerItems';
@@ -234,7 +234,7 @@ export function AppChat() {
 
   const handleConversationExport = (conversationId: DConversationId | null) => setTradeConfig({ dir: 'export', conversationId });
 
-  const handleConversationBranch = React.useCallback((conversationId: DConversationId, messageId: string | null) => {
+  const handleConversationBranch = React.useCallback((conversationId: DConversationId, messageId: string | null): DConversationId | null => {
     showNextTitle.current = true;
     const branchedConversationId = branchConversation(conversationId, messageId);
     addSnackbar({
@@ -251,6 +251,7 @@ export function AppChat() {
       openSplitConversationId(branchedConversationId);
     else
       setFocusedConversationId(branchedConversationId);
+    return branchedConversationId;
   }, [branchConversation, openSplitConversationId, setFocusedConversationId]);
 
   const handleConversationFlatten = (conversationId: DConversationId) => setFlattenConversationId(conversationId);
@@ -290,7 +291,14 @@ export function AppChat() {
 
   // Shortcuts
 
+  const handleOpenChatLlmOptions = React.useCallback(() => {
+    const { chatLLMId } = useModelsStore.getState();
+    if (!chatLLMId) return;
+    openLayoutLLMOptions(chatLLMId);
+  }, []);
+
   const shortcuts = React.useMemo((): GlobalShortcutItem[] => [
+    ['o', true, true, false, handleOpenChatLlmOptions],
     ['r', true, true, false, handleMessageRegenerateLast],
     ['n', true, false, true, handleConversationNew],
     ['b', true, false, true, () => isFocusedChatEmpty || focusedConversationId && handleConversationBranch(focusedConversationId, null)],
@@ -298,7 +306,7 @@ export function AppChat() {
     ['d', true, false, true, () => focusedConversationId && handleConversationDelete(focusedConversationId, false)],
     [ShortcutKeyName.Left, true, false, true, () => handleNavigateHistory('back')],
     [ShortcutKeyName.Right, true, false, true, () => handleNavigateHistory('forward')],
-  ], [focusedConversationId, handleConversationBranch, handleConversationDelete, handleConversationNew, handleMessageRegenerateLast, handleNavigateHistory, isFocusedChatEmpty]);
+  ], [focusedConversationId, handleConversationBranch, handleConversationDelete, handleConversationNew, handleMessageRegenerateLast, handleNavigateHistory, handleOpenChatLlmOptions, isFocusedChatEmpty]);
   useGlobalShortcuts(shortcuts);
 
 
@@ -411,10 +419,16 @@ export function AppChat() {
     {!!diagramConfig && <DiagramsModal config={diagramConfig} onClose={() => setDiagramConfig(null)} />}
 
     {/* Flatten */}
-    {!!flattenConversationId && <FlattenerModal conversationId={flattenConversationId} onClose={() => setFlattenConversationId(null)} />}
+    {!!flattenConversationId && (
+      <FlattenerModal
+        conversationId={flattenConversationId}
+        onConversationBranch={handleConversationBranch}
+        onClose={() => setFlattenConversationId(null)}
+      />
+    )}
 
     {/* Import / Export  */}
-    {!!tradeConfig && <TradeModal config={tradeConfig} onClose={() => setTradeConfig(null)} />}
+    {!!tradeConfig && <TradeModal config={tradeConfig} onConversationActivate={setFocusedConversationId} onClose={() => setTradeConfig(null)} />}
 
 
     {/* [confirmation] Reset Conversation */}
