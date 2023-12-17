@@ -24,6 +24,7 @@ AZURE_OPENAI_API_ENDPOINT=
 AZURE_OPENAI_API_KEY=
 ANTHROPIC_API_KEY=
 ANTHROPIC_API_HOST=
+MISTRAL_API_KEY=
 OLLAMA_API_HOST=
 OPENROUTER_API_KEY=
 
@@ -44,6 +45,10 @@ PUPPETEER_WSS_ENDPOINT=
 
 # Backend Analytics
 BACKEND_ANALYTICS=
+
+# Backend HTTP Basic Authentication
+HTTP_BASIC_AUTH_USERNAME=
+HTTP_BASIC_AUTH_PASSWORD=
 ```
 
 ## Variables Documentation
@@ -75,6 +80,7 @@ requiring the user to enter an API key
 | `AZURE_OPENAI_API_KEY`      | Azure OpenAI API key, see [config-azure-openai.md](config-azure-openai.md)                                                    | Optional, but if set `AZURE_OPENAI_API_ENDPOINT` must also be set |
 | `ANTHROPIC_API_KEY`         | The API key for Anthropic                                                                                                     | Optional                                                          |
 | `ANTHROPIC_API_HOST`        | Changes the backend host for the Anthropic vendor, to enable platforms such as [config-aws-bedrock.md](config-aws-bedrock.md) | Optional                                                          |
+| `MISTRAL_API_KEY`           | The API key for Mistral                                                                                                       | Optional                                                          |
 | `OLLAMA_API_HOST`           | Changes the backend host for the Ollama vendor. See [config-ollama.md](config-ollama.md)                                      |                                                                   |
 | `OPENROUTER_API_KEY`        | The API key for OpenRouter                                                                                                    | Optional                                                          |
 
@@ -94,21 +100,23 @@ It is currently supported for:
 
 Enable the app to Talk, Draw, and Google things up.
 
-| Variable                 | Description                                                                                                             |
-|:-------------------------|:------------------------------------------------------------------------------------------------------------------------|
-| **Text-To-Speech**       | [ElevenLabs](https://elevenlabs.io/) is a high quality speech synthesis service                                         |
-| `ELEVENLABS_API_KEY`     | ElevenLabs API Key - used for calls, etc.                                                                               |
-| `ELEVENLABS_API_HOST`    | Custom host for ElevenLabs                                                                                              |
-| `ELEVENLABS_VOICE_ID`    | Default voice ID for ElevenLabs                                                                                         |
-| **Google Custom Search** | [Google Programmable Search Engine](https://programmablesearchengine.google.com/about/)  produces links to pages        |
-| `GOOGLE_CLOUD_API_KEY`   | Google Cloud API Key, used with the '/react' command - [Link to GCP](https://console.cloud.google.com/apis/credentials) |
-| `GOOGLE_CSE_ID`          | Google Custom/Programmable Search Engine ID - [Link to PSE](https://programmablesearchengine.google.com/)               |
-| **Text-To-Image**        | [Prodia](https://prodia.com/) is a reliable image generation service                                                    |
-| `PRODIA_API_KEY`         | Prodia API Key - used with '/imagine ...'                                                                               |
-| **Browse**               |                                                                                                                         |
-| `PUPPETEER_WSS_ENDPOINT` | Puppeteer WebSocket endpoint - used for browsing, etc.                                                                  |
-| **Backend**              |                                                                                                                         | 
-| `BACKEND_ANALYTICS`      | Semicolon-separated list of analytics flags (see backend.analytics.ts). Flags: `domain` logs the responding domain.     |
+| Variable                   | Description                                                                                                             |
+|:---------------------------|:------------------------------------------------------------------------------------------------------------------------|
+| **Text-To-Speech**         | [ElevenLabs](https://elevenlabs.io/) is a high quality speech synthesis service                                         |
+| `ELEVENLABS_API_KEY`       | ElevenLabs API Key - used for calls, etc.                                                                               |
+| `ELEVENLABS_API_HOST`      | Custom host for ElevenLabs                                                                                              |
+| `ELEVENLABS_VOICE_ID`      | Default voice ID for ElevenLabs                                                                                         |
+| **Google Custom Search**   | [Google Programmable Search Engine](https://programmablesearchengine.google.com/about/)  produces links to pages        |
+| `GOOGLE_CLOUD_API_KEY`     | Google Cloud API Key, used with the '/react' command - [Link to GCP](https://console.cloud.google.com/apis/credentials) |
+| `GOOGLE_CSE_ID`            | Google Custom/Programmable Search Engine ID - [Link to PSE](https://programmablesearchengine.google.com/)               |
+| **Text-To-Image**          | [Prodia](https://prodia.com/) is a reliable image generation service                                                    |
+| `PRODIA_API_KEY`           | Prodia API Key - used with '/imagine ...'                                                                               |
+| **Browse**                 |                                                                                                                         |
+| `PUPPETEER_WSS_ENDPOINT`   | Puppeteer WebSocket endpoint - used for browsing, etc.                                                                  |
+| **Backend**                |                                                                                                                         | 
+| `BACKEND_ANALYTICS`        | Semicolon-separated list of analytics flags (see backend.analytics.ts). Flags: `domain` logs the responding domain.     |
+| `HTTP_BASIC_AUTH_USERNAME` | Username for HTTP Basic Authentication. See the [Authentication](deploy-authentication.md) guide.                       |
+| `HTTP_BASIC_AUTH_PASSWORD` | Password for HTTP Basic Authentication.                                                                                 |
 
 ---
 

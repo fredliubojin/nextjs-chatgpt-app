@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { TRPCError } from '@trpc/server';
 
 import { createTRPCRouter, publicProcedure } from '~/server/api/trpc.server';
 import { env } from '~/server/env.mjs';
@@ -11,12 +12,15 @@ import { capitalizeFirstLetter } from '~/common/util/textUtils';
 import { fixupHost, openAIChatGenerateOutputSchema, OpenAIHistorySchema, openAIHistorySchema, OpenAIModelSchema, openAIModelSchema } from '../openai/openai.router';
 import { listModelsOutputSchema, ModelDescriptionSchema } from '../server.schemas';
 
-import { OLLAMA_BASE_MODELS, OLLAMA_LAST_UPDATE } from './ollama.models';
-import { wireOllamaGenerationSchema } from './ollama.wiretypes';
+import { OLLAMA_BASE_MODELS, OLLAMA_PREV_UPDATE } from './ollama.models';
+import { WireOllamaChatCompletionInput, wireOllamaChunkedOutputSchema } from './ollama.wiretypes';
 
 
 // Default hosts
 const DEFAULT_OLLAMA_HOST = 'http://127.0.0.1:11434';
+export const OLLAMA_PATH_CHAT = '/api/chat';
+const OLLAMA_PATH_TAGS = '/api/tags';
+const OLLAMA_PATH_SHOW = '/api/show';
 
 
 // Mappers
@@ -34,7 +38,23 @@ export function ollamaAccess(access: OllamaAccessSchema, apiPath: string): { hea
 
 }
 
-export function ollamaChatCompletionPayload(model: OpenAIModelSchema, history: OpenAIHistorySchema, stream: boolean) {
+
+export const ollamaChatCompletionPayload = (model: OpenAIModelSchema, history: OpenAIHistorySchema, stream: boolean): WireOllamaChatCompletionInput => ({
+  model: model.id,
+  messages: history,
+  options: {
+    ...(model.temperature && { temperature: model.temperature }),
+  },
+  // n: ...
+  // functions: ...
+  // function_call: ...
+  stream,
+});
+
+
+/* Unused: switched to the Chat endpoint (above). The implementation is left here for reference.
+https://github.com/jmorganca/ollama/blob/main/docs/api.md#generate-a-completion
+export function ollamaCompletionPayload(model: OpenAIModelSchema, history: OpenAIHistorySchema, stream: boolean) {
 
   // if the first message is the system prompt, extract it
   let systemPrompt: string | undefined = undefined;
@@ -62,7 +82,7 @@ export function ollamaChatCompletionPayload(model: OpenAIModelSchema, history: O
     ...(systemPrompt && { system: systemPrompt }),
     stream,
   };
-}
+}*/
 
 async function ollamaGET<TOut extends object>(access: OllamaAccessSchema, apiPath: string /*, signal?: AbortSignal*/): Promise<TOut> {
   const { headers, url } = ollamaAccess(access, apiPath);
@@ -104,6 +124,7 @@ const listPullableOutputSchema = z.object({
     label: z.string(),
     tag: z.string(),
     description: z.string(),
+    pulls: z.number(),
     isNew: z.boolean(),
   })),
 });
@@ -122,7 +143,8 @@ export const llmOllamaRouter = createTRPCRouter({
           label: capitalizeFirstLetter(model_id),
           tag: 'latest',
           description: model.description,
-          isNew: !!model.added && model.added >= OLLAMA_LAST_UPDATE,
+          pulls: model.pulls,
+          isNew: !!model.added && model.added >= OLLAMA_PREV_UPDATE,
         })),
       };
     }),
@@ -160,6 +182,7 @@ export const llmOllamaRouter = createTRPCRouter({
         throw new Error('Ollama delete issue: ' + deleteOutput);
     }),
 
+
   /* Ollama: List the Models available */
   listModels: publicProcedure
     .input(accessOnlySchema)
@@ -167,7 +190,7 @@ export const llmOllamaRouter = createTRPCRouter({
     .query(async ({ input }) => {
 
       // get the models
-      const wireModels = await ollamaGET(input.access, '/api/tags');
+      const wireModels = await ollamaGET(input.access, OLLAMA_PATH_TAGS);
       const wireOllamaListModelsSchema = z.object({
         models: z.array(z.object({
           name: z.string(),
@@ -180,7 +203,7 @@ export const llmOllamaRouter = createTRPCRouter({
 
       // retrieve info for each of the models (/api/show, post call, in parallel)
       const detailedModels = await Promise.all(models.map(async model => {
-        const wireModelInfo = await ollamaPOST(input.access, { 'name': model.name }, '/api/show');
+        const wireModelInfo = await ollamaPOST(input.access, { 'name': model.name }, OLLAMA_PATH_SHOW);
         const wireOllamaModelInfoSchema = z.object({
           license: z.string().optional(),
           modelfile: z.string(),
@@ -221,12 +244,24 @@ export const llmOllamaRouter = createTRPCRouter({
     .output(openAIChatGenerateOutputSchema)
     .mutation(async ({ input: { access, history, model } }) => {
 
-      const wireGeneration = await ollamaPOST(access, ollamaChatCompletionPayload(model, history, false), '/api/generate');
-      const generation = wireOllamaGenerationSchema.parse(wireGeneration);
+      const wireGeneration = await ollamaPOST(access, ollamaChatCompletionPayload(model, history, false), OLLAMA_PATH_CHAT);
+      const generation = wireOllamaChunkedOutputSchema.parse(wireGeneration);
+
+      if ('error' in generation)
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: `Ollama chat-generation issue: ${generation.error}`,
+        });
+
+      if (!generation.message?.content)
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: `Ollama chat-generation API issue: ${JSON.stringify(wireGeneration)}`,
+        });
 
       return {
         role: 'assistant',
-        content: generation.response,
+        content: generation.message.content,
         finish_reason: generation.done ? 'stop' : null,
       };
     }),

@@ -11,7 +11,7 @@ import { asValidURL } from '~/common/util/urlUtils';
 
 import { DModelSourceId, useModelsStore, useSourceSetup } from '../../store-llms';
 import { ModelVendorOllama } from './ollama.vendor';
-import { OllamaAdmin } from './OllamaAdmin';
+import { OllamaAdministration } from './OllamaAdministration';
 import { modelDescriptionToDLLM } from '../openai/OpenAISourceSetup';
 
 
@@ -22,7 +22,7 @@ export function OllamaSourceSetup(props: { sourceId: DModelSourceId }) {
 
   // external state
   const { source, access, updateSetup } =
-    useSourceSetup(props.sourceId, ModelVendorOllama.getAccess);
+    useSourceSetup(props.sourceId, ModelVendorOllama);
 
   // derived state
   const { ollamaHost } = access;
@@ -63,7 +63,7 @@ export function OllamaSourceSetup(props: { sourceId: DModelSourceId }) {
 
     {isError && <InlineError error={error} />}
 
-    {adminOpen && <OllamaAdmin access={access} onClose={() => setAdminOpen(false)} />}
+    {adminOpen && <OllamaAdministration access={access} onClose={() => setAdminOpen(false)} />}
 
   </>;
 }
