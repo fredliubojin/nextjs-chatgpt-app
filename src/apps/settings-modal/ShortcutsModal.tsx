@@ -1,14 +1,13 @@
 import * as React from 'react';
 
-import { ChatMessage } from '../chat/components/message/ChatMessage';
+import { BlocksRenderer } from '~/modules/blocks/BlocksRenderer';
 
 import { GoodModal } from '~/common/components/GoodModal';
-import { closeLayoutShortcuts, useLayoutShortcuts } from '~/common/layout/store-applayout';
-import { createDMessage } from '~/common/state/store-chats';
 import { platformAwareKeystrokes } from '~/common/components/KeyStroke';
+import { useIsMobile } from '~/common/components/useMatchMedia';
 
 
-const shortcutsMd = `
+const shortcutsMd = platformAwareKeystrokes(`
 
 | Shortcut            | Description                                     |
 |---------------------|-------------------------------------------------|
@@ -28,26 +27,29 @@ const shortcutsMd = `
 | **Settings**        |                                                 |
 | Ctrl + Shift + P    | ⚙️ Preferences                                  |
 | Ctrl + Shift + M    | 🧠 Models                                       |
-| Ctrl + Shift + O    | Options (current Chat Model)                    |
+| Ctrl + Shift + O    | 💬 Options (current Chat Model)                 |
+| Ctrl + Shift + +    | Increase Text Size                              |
+| Ctrl + Shift + -    | Decrease Text Size                              |
 | Ctrl + Shift + ?    | Shortcuts                                       |
 
-`.trim();
-
-const shortcutsMessage = createDMessage('assistant', platformAwareKeystrokes(shortcutsMd));
+`).trim();
 
 
-export function ShortcutsModal() {
+export function ShortcutsModal(props: { onClose: () => void }) {
 
   // external state
-  const showShortcuts = useLayoutShortcuts();
+  const isMobile
+    = useIsMobile();
 
   return (
-    <GoodModal
-      open={showShortcuts}
-      title='Desktop Shortcuts'
-      onClose={closeLayoutShortcuts}
-    >
-      <ChatMessage message={shortcutsMessage} hideAvatars noBottomBorder sx={{ p: 0, m: 0 }} />
+    <GoodModal open title='Desktop Shortcuts' onClose={props.onClose}>
+      <BlocksRenderer
+        text={shortcutsMd}
+        fromRole='assistant'
+        contentScaling='sm'
+        isMobile={isMobile}
+        renderTextAsMarkdown
+      />
     </GoodModal>
   );
 }

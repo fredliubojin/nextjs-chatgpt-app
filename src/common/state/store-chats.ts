@@ -3,11 +3,11 @@ import { createJSONStorage, devtools, persist } from 'zustand/middleware';
 import { shallow } from 'zustand/shallow';
 import { v4 as uuidv4 } from 'uuid';
 
-import { DLLMId, useModelsStore } from '~/modules/llms/store-llms';
+import { DLLMId, getChatLLMId } from '~/modules/llms/store-llms';
 
+import { IDB_MIGRATION_INITIAL, idbStateStorage } from '../util/idbUtils';
 import { countModelTokens } from '../util/token-counter';
 import { defaultSystemPurposeId, SystemPurposeId } from '../../data';
-import { IDB_MIGRATION_INITIAL, idbStateStorage } from '../util/idbUtils';
 
 
 export type DConversationId = string;
@@ -25,8 +25,8 @@ export interface DConversation {
   userTitle?: string;
   autoTitle?: string;
   tokenCount: number;                 // f(messages, llmId)
-  created: number;                    // created timestamp
-  updated: number | null;             // updated timestamp
+  created: number;                    // created timestamp (Date.now())
+  updated: number | null;             // updated timestamp (Date.now())
   // Not persisted, used while in-memory, or temporarily by the UI
   abortController: AbortController | null;
   ephemerals: DEphemeral[];
@@ -118,8 +118,7 @@ interface ChatActions {
   prependNewConversation: (personaId: SystemPurposeId | undefined) => DConversationId;
   importConversation: (conversation: DConversation, preventClash: boolean) => DConversationId;
   branchConversation: (conversationId: DConversationId, messageId: string | null) => DConversationId | null;
-  deleteConversation: (conversationId: DConversationId) => DConversationId | null;
-  wipeAllConversations: (personaId: SystemPurposeId | undefined) => DConversationId;
+  deleteConversations: (conversationIds: DConversationId[], newConversationPersonaId?: SystemPurposeId) => DConversationId;
 
   // within a conversation
   startTyping: (conversationId: string, abortController: AbortController | null) => void;
@@ -234,39 +233,28 @@ export const useChatStore = create<ConversationsStore>()(devtools(
         return branched.id;
       },
 
-      deleteConversation: (conversationId: DConversationId): DConversationId | null => {
+      deleteConversations: (conversationIds: DConversationId[], newConversationPersonaId?: SystemPurposeId): DConversationId => {
         let { conversations } = _get();
 
-        // abort pending requests on this conversation
-        const cIndex = conversations.findIndex((conversation: DConversation): boolean => conversation.id === conversationId);
-        if (cIndex >= 0)
-          conversations[cIndex].abortController?.abort();
+        // find the index of first conversation to delete
+        const cIndex = conversationIds.length > 0 ? conversations.findIndex(_c => _c.id === conversationIds[0]) : -1;
+
+        // abort all pending requests
+        conversationIds.forEach(conversationId => conversations.find(_c => _c.id === conversationId)?.abortController?.abort());
 
         // remove from the list
-        conversations = conversations.filter(_c => _c.id !== conversationId);
+        conversations = conversations.filter(_c => !conversationIds.includes(_c.id));
+
+        // create a new conversation if there are no more
+        if (!conversations.length)
+          conversations.push(createDConversation(newConversationPersonaId));
+
         _set({
           conversations,
         });
 
         // return the next conversation Id in line, if valid
-        return conversations.length
-          ? conversations[(cIndex >= 0 && cIndex < conversations.length) ? cIndex : conversations.length - 1].id
-          : null;
-      },
-
-      wipeAllConversations: (personaId: SystemPurposeId | undefined): DConversationId => {
-        const { conversations } = _get();
-
-        // abort any pending requests on all conversations
-        conversations.forEach(conversation => conversation.abortController?.abort());
-
-        const conversation = createDConversation(personaId);
-
-        _set({
-          conversations: [conversation],
-        });
-
-        return conversation.id;
+        return conversations[(cIndex >= 0 && cIndex < conversations.length) ? cIndex : 0].id;
       },
 
 
@@ -342,7 +330,7 @@ export const useChatStore = create<ConversationsStore>()(devtools(
       editMessage: (conversationId: string, messageId: string, updatedMessage: Partial<DMessage>, setUpdated: boolean) =>
         _get()._editConversation(conversationId, conversation => {
 
-          const chatLLMId = useModelsStore.getState().chatLLMId;
+          const chatLLMId = getChatLLMId();
           const messages = conversation.messages.map((message: DMessage): DMessage =>
             message.id === messageId
               ? {
@@ -350,7 +338,7 @@ export const useChatStore = create<ConversationsStore>()(devtools(
                 ...updatedMessage,
                 ...(setUpdated && { updated: Date.now() }),
                 ...(((updatedMessage.typing === false || !message.typing) && chatLLMId && {
-                  tokenCount: countModelTokens(updatedMessage.text || message.text, chatLLMId, 'editMessage(typing=false)'),
+                  tokenCount: countModelTokens(updatedMessage.text || message.text, chatLLMId, 'editMessage(typing=false)') ?? 0,
                 })),
               }
               : message);
@@ -522,7 +510,7 @@ function _migrateLocalStorageData(): ChatState | {} {
  */
 function updateDMessageTokenCount(message: DMessage, llmId: DLLMId | null, forceUpdate: boolean, debugFrom: string): number {
   if (forceUpdate || !message.tokenCount)
-    message.tokenCount = llmId ? countModelTokens(message.text, llmId, debugFrom) : 0;
+    message.tokenCount = llmId ? countModelTokens(message.text, llmId, debugFrom) ?? 0 : 0;
   return message.tokenCount;
 }
 
@@ -530,7 +518,7 @@ function updateDMessageTokenCount(message: DMessage, llmId: DLLMId | null, force
  * Convenience function to update a set of messages, using the current chatLLM
  */
 function updateTokenCounts(messages: DMessage[], forceUpdate: boolean, debugFrom: string): number {
-  const { chatLLMId } = useModelsStore.getState();
+  const chatLLMId = getChatLLMId();
   return 3 + messages.reduce((sum, message) => 4 + updateDMessageTokenCount(message, chatLLMId, forceUpdate, debugFrom) + sum, 0);
 }
 
@@ -542,23 +530,22 @@ export const useConversation = (conversationId: DConversationId | null) => useCh
 
   // this object will change if any sub-prop changes as well
   const conversation = conversationId ? conversations.find(_c => _c.id === conversationId) ?? null : null;
+  const conversationIdx = conversation ? conversations.findIndex(_c => _c.id === conversation.id) : -1;
   const title = conversation ? conversationTitle(conversation) : null;
-  const chatIdx = conversation ? conversations.findIndex(_c => _c.id === conversation.id) : -1;
   const isChatEmpty = conversation ? !conversation.messages.length : true;
   const areChatsEmpty = isChatEmpty && conversations.length < 2;
   const newConversationId: DConversationId | null = (conversations.length && !conversations[0].messages.length) ? conversations[0].id : null;
 
   return {
     title,
-    chatIdx,
     isChatEmpty,
     areChatsEmpty,
+    conversationIdx,
     newConversationId,
     _remove_systemPurposeId: conversation?.systemPurposeId ?? null,
     prependNewConversation: state.prependNewConversation,
     branchConversation: state.branchConversation,
-    deleteConversation: state.deleteConversation,
-    wipeAllConversations: state.wipeAllConversations,
+    deleteConversations: state.deleteConversations,
     setMessages: state.setMessages,
   };
 }, shallow);
