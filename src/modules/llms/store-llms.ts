@@ -334,6 +334,45 @@ export function findSourceOrThrow<TSourceSetup>(sourceId: DModelSourceId) {
   return source;
 }
 
+/**
+ * Heuristic to returns the top LLMs from different vendors (diverse), based on their elo,
+ * until there are vendors, otherwise loops, and pads with the fallback.
+ * @param count returns up to this number of LLMs
+ * @param requireElo if true, only LLMs with elo are returned
+ * @param fallback the LLM to use if there are not enough LLMs
+ */
+export function getDiverseTopLlmIds(count: number, requireElo: boolean, fallback: DLLMId | null): DLLMId[] {
+  const llmIDs: DLLMId[] = [];
+
+  // iterate through the groups, and top to bottom
+  const llms = useModelsStore.getState().llms;
+  const groupedLlms = groupLlmsByVendor(llms);
+  let groupLevel = 0;
+  while (llmIDs.length < count) {
+    let added = false;
+
+    for (const group of groupedLlms) {
+      if (groupLevel < group.llmsByElo.length) {
+        const llmEntry = group.llmsByElo[groupLevel];
+        if (!llmEntry.id || (requireElo && llmEntry.cbaElo === undefined))
+          continue;
+        llmIDs.push(llmEntry.id);
+        added = true;
+        if (llmIDs.length === count) break; // fast exit
+      }
+    }
+
+    if (!added)
+      break;
+    groupLevel++;
+  }
+
+  // pad with the fallback
+  while (llmIDs.length < count && fallback)
+    llmIDs.push(fallback);
+
+  return llmIDs;
+}
 
 function groupLlmsByVendor(llms: DLLM[]): { vendorId: ModelVendorId, llmsByElo: { id: DLLMId, cbaElo: number | undefined }[] }[] {
   // group all LLMs by vendor
@@ -356,7 +395,7 @@ function groupLlmsByVendor(llms: DLLM[]): { vendorId: ModelVendorId, llmsByElo: 
 }
 
 
-export function updateSelectedIds(allLlms: DLLM[], chatLlmId: DLLMId | null, fastLlmId: DLLMId | null, funcLlmId: DLLMId | null) {
+function updateSelectedIds(allLlms: DLLM[], chatLlmId: DLLMId | null, fastLlmId: DLLMId | null, funcLlmId: DLLMId | null) {
 
   // the output of groupLlmsByVendor
   let grouped: ReturnType<typeof groupLlmsByVendor> | null = null;
@@ -381,7 +420,7 @@ export function updateSelectedIds(allLlms: DLLM[], chatLlmId: DLLMId | null, fas
       : null;
   }
 
-  // a func llm (
+  // a func llm (same as chat for now, hoping the highest grade also has function calling)
   if (!funcLlmId || !allLlms.find(llm => llm.id === funcLlmId))
     funcLlmId = chatLlmId;
 

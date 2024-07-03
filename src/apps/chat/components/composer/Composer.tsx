@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { shallow } from 'zustand/shallow';
 import { useShallow } from 'zustand/react/shallow';
 import { fileOpen, FileWithHandle } from 'browser-fs-access';
 
@@ -28,7 +27,7 @@ import { ConversationsManager } from '~/common/chats/ConversationsManager';
 import { PreferencesTab, useOptimaLayout } from '~/common/layout/optima/useOptimaLayout';
 import { SpeechResult, useSpeechRecognition } from '~/common/components/useSpeechRecognition';
 import { animationEnterBelow } from '~/common/util/animUtils';
-import { conversationTitle, DConversationId, getConversation, useChatStore } from '~/common/state/store-chats';
+import { conversationTitle, DConversationId, DMessageMetadata, getConversation, useChatStore } from '~/common/state/store-chats';
 import { countModelTokens } from '~/common/util/token-counter';
 import { isMacUser } from '~/common/util/pwaUtils';
 import { launchAppCall } from '~/common/app.routes';
@@ -51,11 +50,10 @@ import { useActileManager } from './actile/useActileManager';
 
 import type { AttachmentId } from './attachments/store-attachments';
 import { Attachments } from './attachments/Attachments';
-import { getTextBlockText, useLLMAttachments } from './attachments/useLLMAttachments';
+import { getSingleTextBlockText, useLLMAttachments } from './attachments/useLLMAttachments';
 import { useAttachments } from './attachments/useAttachments';
 
 import type { ComposerOutputMultiPart } from './composer.types';
-import { BubbleReplyTo } from './BubbleReplyTo';
 import { ButtonAttachCameraMemo, useCameraCaptureModal } from './buttons/ButtonAttachCamera';
 import { ButtonAttachClipboardMemo } from './buttons/ButtonAttachClipboard';
 import { ButtonAttachFileMemo } from './buttons/ButtonAttachFile';
@@ -67,6 +65,7 @@ import { ButtonMicMemo } from './buttons/ButtonMic';
 import { ButtonMultiChatMemo } from './buttons/ButtonMultiChat';
 import { ButtonOptionsDraw } from './buttons/ButtonOptionsDraw';
 import { ChatModeMenu } from './ChatModeMenu';
+import { ReplyToBubble } from '../message/ReplyToBubble';
 import { TokenBadgeMemo } from './TokenBadge';
 import { TokenProgressbarMemo } from './TokenProgressbar';
 import { useComposerStartupText } from './store-composer';
@@ -102,7 +101,7 @@ export function Composer(props: {
   capabilityHasT2I: boolean;
   isMulticast: boolean | null;
   isDeveloperMode: boolean;
-  onAction: (chatModeId: ChatModeId, conversationId: DConversationId, multiPartMessage: ComposerOutputMultiPart) => boolean;
+  onAction: (conversationId: DConversationId, chatModeId: ChatModeId, multiPartMessage: ComposerOutputMultiPart, metadata?: DMessageMetadata) => boolean;
   onTextImagine: (conversationId: DConversationId, text: string) => void;
   setIsMulticast: (on: boolean) => void;
   sx?: SxProps;
@@ -118,11 +117,11 @@ export function Composer(props: {
 
   // external state
   const { openPreferencesTab /*, setIsFocusedMode*/ } = useOptimaLayout();
-  const { labsAttachScreenCapture, labsBeam, labsCameraDesktop } = useUXLabsStore(state => ({
+  const { labsAttachScreenCapture, labsCameraDesktop, labsShowCost } = useUXLabsStore(useShallow(state => ({
     labsAttachScreenCapture: state.labsAttachScreenCapture,
-    labsBeam: state.labsBeam,
     labsCameraDesktop: state.labsCameraDesktop,
-  }), shallow);
+    labsShowCost: state.labsShowCost,
+  })));
   const timeToShowTips = useAppStateStore(state => state.usageCount > 2);
   const { novel: explainShiftEnter, touch: touchShiftEnter } = useUICounter('composer-shift-enter');
   const { novel: explainAltEnter, touch: touchAltEnter } = useUICounter('composer-alt-enter');
@@ -130,7 +129,7 @@ export function Composer(props: {
   const [startupText, setStartupText] = useComposerStartupText();
   const enterIsNewline = useUIPreferencesStore(state => state.enterIsNewline);
   const chatMicTimeoutMs = useChatMicTimeoutMsValue();
-  const { assistantAbortible, systemPurposeId, tokenCount: _historyTokenCount, stopTyping } = useChatStore(state => {
+  const { assistantAbortible, systemPurposeId, tokenCount: _historyTokenCount, stopTyping } = useChatStore(useShallow(state => {
     const conversation = state.conversations.find(_c => _c.id === props.conversationId);
     return {
       assistantAbortible: conversation ? !!conversation.abortController : false,
@@ -138,7 +137,7 @@ export function Composer(props: {
       tokenCount: conversation ? conversation.tokenCount : 0,
       stopTyping: state.stopTyping,
     };
-  }, shallow);
+  }));
   const { inComposer: browsingInComposer } = useBrowseCapability();
   const { attachAppendClipboardItems, attachAppendDataTransfer, attachAppendEgoMessage, attachAppendFile, attachments: _attachments, clearAttachments, removeAttachment } =
     useAttachments(browsingInComposer && !composeText.startsWith('/'));
@@ -146,8 +145,8 @@ export function Composer(props: {
   // external overlay state (extra conversationId-dependent state)
   const conversationHandler = props.conversationId ? ConversationsManager.getHandler(props.conversationId) : null;
   const conversationOverlayStore = conversationHandler?.getOverlayStore() ?? null;
-  const { replyToText } = useChatOverlayStore(conversationOverlayStore, useShallow(store => ({
-    replyToText: chatModeId === 'generate-text' ? store.replyToText : null,
+  const { replyToGenerateText } = useChatOverlayStore(conversationOverlayStore, useShallow(store => ({
+    replyToGenerateText: chatModeId === 'generate-text' ? store.replyToText?.trim() || null : null,
   })));
 
 
@@ -174,6 +173,8 @@ export function Composer(props: {
   const tokensHistory = _historyTokenCount;
   const tokensReponseMax = (props.chatLLM?.options as LLMOptionsOpenAI /* FIXME: BIG ASSUMPTION */)?.llmResponseTokens || 0;
   const tokenLimit = props.chatLLM?.contextTokens || 0;
+  const tokenPriceIn = props.chatLLM?.pricing?.chatIn;
+  const tokenPriceOut = props.chatLLM?.pricing?.chatOut;
 
 
   // Effect: load initial text if queued up (e.g. by /link/share_targe)
@@ -185,6 +186,18 @@ export function Composer(props: {
   }, [setComposeText, setStartupText, startupText]);
 
 
+  // Overlay actions
+
+  const handleReplyToCleared = React.useCallback(() => {
+    conversationOverlayStore?.getState().setReplyToText(null);
+  }, [conversationOverlayStore]);
+
+  React.useEffect(() => {
+    if (replyToGenerateText)
+      setTimeout(() => props.composerTextAreaRef.current?.focus(), 1 /* prevent focus theft */);
+  }, [replyToGenerateText, props.composerTextAreaRef]);
+
+
   // Primary button
 
   const { conversationId, onAction } = props;
@@ -193,28 +206,32 @@ export function Composer(props: {
     if (!conversationId)
       return false;
 
-    // get attachments
-    const multiPartMessage = llmAttachments.getAttachmentsOutputs(composerText || null);
+    // get the multipart output including all attachments
+    const multiPartMessage = llmAttachments.collapseWithAttachments(composerText || null);
     if (!multiPartMessage.length)
       return false;
 
+    // metadata
+    const metadata = replyToGenerateText ? { inReplyToText: replyToGenerateText } : undefined;
+
     // send the message
-    const enqueued = onAction(_chatModeId, conversationId, multiPartMessage);
+    const enqueued = onAction(conversationId, _chatModeId, multiPartMessage, metadata);
     if (enqueued) {
       clearAttachments();
+      handleReplyToCleared();
       setComposeText('');
     }
 
     return enqueued;
-  }, [clearAttachments, conversationId, llmAttachments, onAction, setComposeText]);
+  }, [clearAttachments, conversationId, handleReplyToCleared, llmAttachments, onAction, replyToGenerateText, setComposeText]);
 
   const handleSendClicked = React.useCallback(() => {
     handleSendAction(chatModeId, composeText);
   }, [chatModeId, composeText, handleSendAction]);
 
   const handleSendTextBeamClicked = React.useCallback(() => {
-    labsBeam && handleSendAction('generate-text-beam', composeText);
-  }, [composeText, handleSendAction, labsBeam]);
+    handleSendAction('generate-text-beam', composeText);
+  }, [composeText, handleSendAction]);
 
   const handleStopClicked = React.useCallback(() => {
     !!props.conversationId && stopTyping(props.conversationId);
@@ -237,18 +254,6 @@ export function Composer(props: {
     props.onTextImagine(props.conversationId, composeText);
     setComposeText('');
   }, [composeText, props, setComposeText]);
-
-
-  // Overlay actions
-
-  const handleReplyToCleared = React.useCallback(() => {
-    conversationOverlayStore?.getState().setReplyToText(null);
-  }, [conversationOverlayStore]);
-
-  React.useEffect(() => {
-    if (replyToText)
-      setTimeout(() => props.composerTextAreaRef.current?.focus(), 1 /* prevent focus theft */);
-  }, [replyToText, props.composerTextAreaRef]);
 
 
   // Mode menu
@@ -327,15 +332,15 @@ export function Composer(props: {
 
       // Alt (Windows) or Option (Mac) + Enter: append the message instead of sending it
       if (e.altKey) {
-        touchAltEnter();
-        handleSendAction('append-user', composeText);
+        if (handleSendAction('append-user', composeText))
+          touchAltEnter();
         return e.preventDefault();
       }
 
       // Ctrl (Windows) or Command (Mac) + Enter: send for beaming
-      if (labsBeam && ((isMacUser && e.metaKey && !e.ctrlKey) || (!isMacUser && e.ctrlKey && !e.metaKey))) {
-        touchCtrlEnter();
-        handleSendAction('generate-text-beam', composeText);
+      if ((isMacUser && e.metaKey && !e.ctrlKey) || (!isMacUser && e.ctrlKey && !e.metaKey)) {
+        if (handleSendAction('generate-text-beam', composeText))
+          touchCtrlEnter();
         return e.preventDefault();
       }
 
@@ -349,7 +354,7 @@ export function Composer(props: {
       }
     }
 
-  }, [actileInterceptKeydown, assistantAbortible, chatModeId, composeText, enterIsNewline, handleSendAction, labsBeam, touchAltEnter, touchCtrlEnter, touchShiftEnter]);
+  }, [actileInterceptKeydown, assistantAbortible, chatModeId, composeText, enterIsNewline, handleSendAction, touchAltEnter, touchCtrlEnter, touchShiftEnter]);
 
 
   // Focus mode
@@ -450,8 +455,8 @@ export function Composer(props: {
 
   const handleAttachmentInlineText = React.useCallback((attachmentId: AttachmentId) => {
     setComposeText(currentText => {
-      const attachmentOutputs = llmAttachments.getAttachmentOutputs(currentText, attachmentId);
-      const inlinedText = getTextBlockText(attachmentOutputs) || '';
+      const inlinedMultiPart = llmAttachments.collapseWithAttachment(currentText, attachmentId);
+      const inlinedText = getSingleTextBlockText(inlinedMultiPart) || '';
       removeAttachment(attachmentId);
       return inlinedText;
     });
@@ -459,8 +464,8 @@ export function Composer(props: {
 
   const handleAttachmentsInlineText = React.useCallback(() => {
     setComposeText(currentText => {
-      const attachmentsOutputs = llmAttachments.getAttachmentsOutputs(currentText);
-      const inlinedText = getTextBlockText(attachmentsOutputs) || '';
+      const inlinedMultiPart = llmAttachments.collapseWithAttachments(currentText);
+      const inlinedText = getSingleTextBlockText(inlinedMultiPart) || '';
       clearAttachments();
       return inlinedText;
     });
@@ -518,7 +523,8 @@ export function Composer(props: {
   const isReAct = chatModeId === 'generate-react';
   const isDraw = chatModeId === 'generate-image';
 
-  const showChatExtras = isText;
+  const showChatReplyTo = !!replyToGenerateText;
+  const showChatExtras = isText && !showChatReplyTo;
 
   const buttonVariant: VariantProp = (isAppend || (isMobile && isTextBeam)) ? 'outlined' : 'solid';
 
@@ -548,7 +554,7 @@ export function Composer(props: {
     isDraw ? 'Describe an idea or a drawing...'
       : isReAct ? 'Multi-step reasoning question...'
         : isTextBeam ? 'Beam: combine the smarts of models...'
-          : replyToText ? 'Chat about this...'
+          : showChatReplyTo ? 'Chat about this'
             : props.isDeveloperMode ? 'Chat with me' + (isDesktop ? ' · drop source' : '') + ' · attach code...'
               : props.capabilityHasT2I ? 'Chat · /beam · /draw · drop files...'
                 : 'Chat · /react · drop files...';
@@ -557,7 +563,7 @@ export function Composer(props: {
       textPlaceholder += !enterIsNewline ? '\n\n💡 Shift + Enter to add a new line' : '\n\n💡 Shift + Enter to send';
     else if (explainAltEnter)
       textPlaceholder += platformAwareKeystrokes('\n\n💡 Tip: Alt + Enter to just append the message');
-    else if (labsBeam && explainCtrlEnter)
+    else if (explainCtrlEnter)
       textPlaceholder += platformAwareKeystrokes('\n\n💡 Tip: Ctrl + Enter to beam');
   }
 
@@ -632,9 +638,6 @@ export function Composer(props: {
             minWidth: 200, // flex: enable X-scrolling (resetting any possible minWidth due to the attachments)
           }}>
 
-            {/* Reply-to */}
-            {!!replyToText && <BubbleReplyTo replyToText={replyToText} onClick={handleReplyToCleared} />}
-
             {/* Textarea + Mic buttons + Mic/Drag overlay */}
             <Box sx={{ position: 'relative' }}>
 
@@ -645,7 +648,7 @@ export function Composer(props: {
                   variant='outlined'
                   color={isDraw ? 'warning' : isReAct ? 'success' : undefined}
                   autoFocus
-                  minRows={isMobile ? 4 : 5}
+                  minRows={isMobile ? 4 : showChatReplyTo ? 4 : 5}
                   maxRows={isMobile ? 8 : 10}
                   placeholder={textPlaceholder}
                   value={composeText}
@@ -656,6 +659,7 @@ export function Composer(props: {
                   onPasteCapture={handleAttachCtrlV}
                   // onFocusCapture={handleFocusModeOn}
                   // onBlurCapture={handleFocusModeOff}
+                  endDecorator={showChatReplyTo && <ReplyToBubble replyToText={replyToGenerateText} onClear={handleReplyToCleared} className='reply-to-bubble' />}
                   slotProps={{
                     textarea: {
                       enterKeyHint: enterIsNewline ? 'enter' : 'send',
@@ -668,16 +672,16 @@ export function Composer(props: {
                   }}
                   sx={{
                     backgroundColor: 'background.level1',
-                    '&:focus-within': { backgroundColor: 'background.popup' },
+                    '&:focus-within': { backgroundColor: 'background.popup', '.reply-to-bubble': { backgroundColor: 'background.popup' } },
                     lineHeight: lineHeightTextareaMd,
                   }} />
 
-                {tokenLimit > 0 && (tokensComposer > 0 || (tokensHistory + tokensReponseMax) > 0) && (
-                  <TokenProgressbarMemo direct={tokensComposer} history={tokensHistory} responseMax={tokensReponseMax} limit={tokenLimit} />
+                {!showChatReplyTo && tokenLimit > 0 && (tokensComposer > 0 || (tokensHistory + tokensReponseMax) > 0) && (
+                  <TokenProgressbarMemo direct={tokensComposer} history={tokensHistory} responseMax={tokensReponseMax} limit={tokenLimit} tokenPriceIn={tokenPriceIn} tokenPriceOut={tokenPriceOut} />
                 )}
 
-                {!!tokenLimit && (
-                  <TokenBadgeMemo direct={tokensComposer} history={tokensHistory} responseMax={tokensReponseMax} limit={tokenLimit} showExcess absoluteBottomRight />
+                {!showChatReplyTo && tokenLimit > 0 && (
+                  <TokenBadgeMemo direct={tokensComposer} history={tokensHistory} responseMax={tokensReponseMax} limit={tokenLimit} tokenPriceIn={tokenPriceIn} tokenPriceOut={tokenPriceOut} showCost={labsShowCost} showExcess absoluteBottomRight />
                 )}
 
               </Box>
@@ -838,7 +842,7 @@ export function Composer(props: {
               </ButtonGroup>
 
               {/* [desktop] secondary-top buttons */}
-              {labsBeam && isDesktop && showChatExtras && !assistantAbortible && (
+              {isDesktop && showChatExtras && !assistantAbortible && (
                 <ButtonBeamMemo
                   disabled={!props.conversationId || !chatLLMId || !llmAttachments.isOutputAttacheable}
                   hasContent={!!composeText}
